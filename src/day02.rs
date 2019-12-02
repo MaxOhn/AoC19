@@ -9,32 +9,30 @@ pub fn solve() -> (usize, usize) {
         .map(|n| n.parse().unwrap())
         .collect::<Vec<usize>>();
     let mut memory = input.clone();
-    run(12, 2, &mut memory);
-    let p1 = memory[0];
+    let p1 = run(12, 2, &mut memory);
     for noun in 0..100 {
         for verb in 0..100 {
-            let mut memory = input.clone();
-            run(noun, verb, &mut memory);
-            if memory[0] == 19690720 {
+            memory = input.clone();
+            if run(noun, verb, &mut memory) == 19690720 {
                 return (p1, 100 * noun + verb);
             }
         }
     }
     unreachable!();
-} // 59.51ms
+} // 8.52ms
 
-fn run(noun: usize, verb: usize, memory: &mut Vec<usize>) {
+fn run(noun: usize, verb: usize, memory: &mut [usize]) -> usize {
     memory[1] = noun;
     memory[2] = verb;
-    let mut idx = 0;
-    while idx < memory.len() {
-        let (a1, a2, pos) = (memory[idx + 1], memory[idx + 2], memory[idx + 3]);
-        match memory[idx] {
-            1 => memory[pos] = memory[a1] + memory[a2],
-            2 => memory[pos] = memory[a1] * memory[a2],
-            99 => break,
+    let mut i = 0;
+    loop {
+        let (a1, a2, s) = (memory[i + 1], memory[i + 2], memory[i + 3]);
+        match memory[i] {
+            99 => break memory[0],
+            1 => memory[s] = memory[a1] + memory[a2],
+            2 => memory[s] = memory[a1] * memory[a2],
             _ => panic!("Something went wrong :(")
         }
-        idx += 4;
+        i += 4;
     }
 }
