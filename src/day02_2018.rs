@@ -1,11 +1,9 @@
 
-use std::fs;
 use std::collections::HashMap;
  
 #[allow(dead_code)]
-pub fn solve() -> (i32, String) {
+pub fn solve(input: String) -> (i32, String) {
     let (mut twice, mut thrice) = (0, 0);
-    let input = fs::read_to_string("src/inputs/day02_2018.txt").unwrap();
     input.lines()
         .for_each(|line| {
             let mut characters = HashMap::with_capacity(26);
@@ -33,3 +31,19 @@ pub fn solve() -> (i32, String) {
     }
     unreachable!();
 } // 114.77ms
+
+#[test]
+fn example1() {
+    assert_eq!(
+        solve(String::from("abcdef\nbababc\nabbcde\nabcccd\naabcdd\nabcdee\nababab")).0,
+        12
+    );
+}
+
+#[test]
+fn example2() {
+    assert_eq!(
+        solve(String::from("abcde\nfghij\nklmno\npqrst\nfguij\naxcye\nwvxyz")).1,
+        "fgij"
+    );
+}
