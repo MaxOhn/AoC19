@@ -1,5 +1,4 @@
 
-#[allow(dead_code)]
 pub fn solve(input: String) -> (i32, i32) {
     let (mut p1, mut p2) = (0, 0);
     input.lines()

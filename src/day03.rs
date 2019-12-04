@@ -26,7 +26,6 @@ impl Wire {
     }
 }
 
-#[allow(dead_code)]
 pub fn solve(input: String) -> (i32, i32) {
     let wires: Vec<Wire> = input.lines()
         .map(|line| Wire::new(line))

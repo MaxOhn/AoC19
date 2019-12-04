@@ -1,5 +1,4 @@
 
-#[allow(dead_code)]
 pub fn solve(input: String) -> (usize, usize) {
     let intcodes = input.split(",")
         .map(|n| n.parse().unwrap())
