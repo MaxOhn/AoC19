@@ -1,8 +1,8 @@
 
 pub fn solve(input: String) -> (usize, usize) {
-    let intcodes = input.split(",")
+    let intcodes: Vec<usize> = input.split(",")
         .map(|n| n.parse().unwrap())
-        .collect::<Vec<usize>>();
+        .collect();
     let mut memory = intcodes.clone();
     let p1 = run(12, 2, &mut memory);
     for noun in 0..100 {

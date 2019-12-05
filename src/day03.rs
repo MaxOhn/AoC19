@@ -59,11 +59,7 @@ fn follow_wire(wire: &Wire, seen_positions: &mut HashMap<(i32, i32), i32>, outpu
             }
         }
     }
-    if output {
-        Some((closest_cross, shortest_cross))
-    } else { 
-        None 
-    }
+    Some((closest_cross, shortest_cross))
 }
 
 #[test]

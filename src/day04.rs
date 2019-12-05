@@ -1,5 +1,5 @@
 
-use std::collections::HashSet;
+use std::cmp::Ordering;
 
 pub fn solve(input: String) -> (i32, i32) {
     let input_split: Vec<i32> = input.split("-")
@@ -16,7 +16,7 @@ pub fn solve(input: String) -> (i32, i32) {
         }
     }
     (p1, p2)
-}
+} // 39.78ms
 
 fn check_p1(n: i32) -> bool {
     let mut has_double = false;
@@ -37,37 +37,26 @@ fn check_p1(n: i32) -> bool {
 }
 
 fn check_p2(n: i32) -> bool {
-    let mut doubles = HashSet::new();
-    let mut removed = HashSet::new();
-    let mut second_last = n % 10;
-    let mut last = (n / 10) % 10;
-    if second_last == last {
-        doubles.insert(last);
-    }
-    if last > second_last {
-        return false;
-    }
-    let mut m = n / 10;
+    let mut has_double = false;
+    let mut last = n % 10;
+    let mut count = 1;
+    let mut m = n;
     while m > 0 {
         m /= 10;
         let k = m % 10;
-        if k > last {
-            return false;
-        }
-        if k == last {
-            if !removed.contains(&k) {
-                if last == second_last {
-                    doubles.remove(&second_last);
-                    removed.insert(second_last);
-                } else {
-                    doubles.insert(k);
+        match k.cmp(&last) {
+            Ordering::Greater => return false,
+            Ordering::Equal => count += 1,
+            Ordering::Less => {
+                if count == 2 {
+                    has_double = true;
                 }
+                count = 1;
             }
         }
-        second_last = last;
         last = k;
     }
-    doubles.len() > 0
+    has_double || count == 2
 }
 
 #[test]
