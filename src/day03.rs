@@ -18,8 +18,8 @@ impl Wire {
                 line.split(',')
                     .map(|elem| elem.split_at(1))
                     .map(|(a, b)| Element { 
-                        dir: a.parse::<char>().unwrap(), 
-                        len: b.parse::<i32>().unwrap() 
+                        dir: a.parse().unwrap(), 
+                        len: b.parse().unwrap() 
                     }).collect()
             }
         }

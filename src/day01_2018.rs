@@ -7,7 +7,7 @@ pub fn solve(input: String) -> (i32, i32) {
     let input: Vec<i32> = input.lines()
         .map(|line| line.parse().unwrap())
         .collect();
-    let p1 = input.iter().sum::<i32>();
+    let p1 = input.iter().sum();
     let p2 = Cell::new(0);
     let mut seen = HashSet::new();
     input.iter()

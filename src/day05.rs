@@ -12,7 +12,7 @@ pub fn solve(input: String) -> (i32, i32) {
         None => panic!("Error: Got None for part 2")
     };
     (p1, p2)
-}
+} // 0.28ms
 
 struct Operation {
     opcode: i32,
@@ -37,7 +37,7 @@ impl Operation {
         match opcode {
             1 | 2 | 7 | 8 => Some(Operation { opcode, v1, v2, w: mem[pc + 3] as usize, pc: pc + 4 }),
             5 | 6 => Some(Operation { opcode, v1, v2, w: 0, pc }),
-            _ => panic!("Problem: opcode = {}", opcode)
+            _ => panic!("Error: opcode = {}", opcode)
         }
     }
 }
@@ -64,20 +64,14 @@ fn run(memory: &mut [i32], input: i32) -> Option<i32> {
 
 #[test]
 fn example1() {
-    let intcodes: Vec<i32> = "3,9,7,9,10,9,4,9,99,-1,8"
-        .split(",")
-        .map(|n| n.parse().unwrap())
-        .collect();
+    let intcodes = [3,9,7,9,10,9,4,9,99,-1,8];
     assert_eq!(run(&mut intcodes.clone(), 7).unwrap(), 1);
     assert_eq!(run(&mut intcodes.clone(), 9).unwrap(), 0);
 }
 
 #[test]
 fn example2() {
-    let intcodes: Vec<i32> = "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99"
-        .split(",")
-        .map(|n| n.parse().unwrap())
-        .collect();
+    let intcodes = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99];
     assert_eq!(run(&mut intcodes.clone(), 7).unwrap(), 999);
     assert_eq!(run(&mut intcodes.clone(), 8).unwrap(), 1000);
     assert_eq!(run(&mut intcodes.clone(), 9).unwrap(), 1001);
