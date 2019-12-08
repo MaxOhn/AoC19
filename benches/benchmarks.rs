@@ -6,7 +6,7 @@ use std::time::Duration;
 use criterion::{criterion_group, criterion_main, Criterion};
 
 fn target_01(c: &mut Criterion) {
-    let input = fs::read_to_string("src/inputs/day01.txt").unwrap();
+    let input = fs::read_to_string("inputs/day01.txt").unwrap();
     c.bench_function("day01", |b| {
         b.iter(|| {
             aoc19::day01::solve(String::from(&input))
@@ -15,7 +15,7 @@ fn target_01(c: &mut Criterion) {
 }
 
 fn target_02(c: &mut Criterion) {
-    let input = fs::read_to_string("src/inputs/day02.txt").unwrap();
+    let input = fs::read_to_string("inputs/day02.txt").unwrap();
     c.bench_function("day02", |b| {
         b.iter(|| {
             aoc19::day02::solve(String::from(&input))
@@ -24,7 +24,7 @@ fn target_02(c: &mut Criterion) {
 }
 
 fn target_03(c: &mut Criterion) {
-    let input = fs::read_to_string("src/inputs/day03.txt").unwrap();
+    let input = fs::read_to_string("inputs/day03.txt").unwrap();
     c.bench_function("day03", |b| {
         b.iter(|| {
             aoc19::day03::solve(String::from(&input))
@@ -33,7 +33,7 @@ fn target_03(c: &mut Criterion) {
 }
 
 fn target_04(c: &mut Criterion) {
-    let input = fs::read_to_string("src/inputs/day04.txt").unwrap();
+    let input = fs::read_to_string("inputs/day04.txt").unwrap();
     c.bench_function("day04", |b| {
         b.iter(|| {
             aoc19::day04::solve(String::from(&input))
@@ -42,7 +42,7 @@ fn target_04(c: &mut Criterion) {
 }
 
 fn target_05(c: &mut Criterion) {
-    let input = fs::read_to_string("src/inputs/day05.txt").unwrap();
+    let input = fs::read_to_string("inputs/day05.txt").unwrap();
     c.bench_function("day05", |b| {
         b.iter(|| {
             aoc19::day05::solve(String::from(&input))
@@ -51,7 +51,7 @@ fn target_05(c: &mut Criterion) {
 }
 
 fn target_06(c: &mut Criterion) {
-    let input = fs::read_to_string("src/inputs/day06.txt").unwrap();
+    let input = fs::read_to_string("inputs/day06.txt").unwrap();
     c.bench_function("day06", |b| {
         b.iter(|| {
             aoc19::day06::solve(String::from(&input))
@@ -60,7 +60,7 @@ fn target_06(c: &mut Criterion) {
 }
 
 fn target_07(c: &mut Criterion) {
-    let input = fs::read_to_string("src/inputs/day07.txt").unwrap();
+    let input = fs::read_to_string("inputs/day07.txt").unwrap();
     c.bench_function("day07", |b| {
         b.iter(|| {
             aoc19::day07::solve(String::from(&input))
@@ -69,7 +69,7 @@ fn target_07(c: &mut Criterion) {
 }
 
 fn target_08(c: &mut Criterion) {
-    let input = fs::read_to_string("src/inputs/day08.txt").unwrap();
+    let input = fs::read_to_string("inputs/day08.txt").unwrap();
     c.bench_function("day08", |b| {
         b.iter(|| {
             aoc19::day08::solve(String::from(&input))
