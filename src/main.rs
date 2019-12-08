@@ -1,20 +1,9 @@
 
-#[macro_use] extern crate cached;
-
-mod day01;
-mod day01_2018;
-mod day02;
-mod day02_2018;
-mod day03;
-mod day04;
-mod day05;
-mod day06;
-mod day07;
-mod day08;
-
 use std::fs;
 use std::env;
 use std::time::Instant;
+
+use aoc19;
 
 fn main() {
     let days = vec![1, 2, 3, 4, 5, 6, 7, 8];
@@ -31,14 +20,15 @@ fn main() {
         "[Day {}]\n{}\n[Elapsed time: {:?}]",
         day,
         match day {
-            1 => day01::solve(input).to_string(),
-            2 => day02::solve(input).to_string(),
-            3 => day03::solve(input).to_string(),
-            4 => day04::solve(input).to_string(),
-            5 => day05::solve(input).to_string(),
-            6 => day06::solve(input).to_string(),
-            7 => day07::solve(input).to_string(),
-            8 => day08::solve(input).to_string(),
+            1 => aoc19::day01::solve(input).to_string(),
+            2 => aoc19::day02::solve(input).to_string(),
+            3 => aoc19::day03::solve(input).to_string(),
+            4 => aoc19::day04::solve(input).to_string(),
+            5 => aoc19::day05::solve(input).to_string(),
+            6 => aoc19::day06::solve(input).to_string(),
+            7 => aoc19::day07::solve(input).to_string(),
+            8 => aoc19::day08::solve(input).to_string(),
+            d if 0 < d && d < 26 => panic!("Error: Day {} not yet implemented", d),
             _ => panic!("Error: Invalid day"),
         },
         Instant::now().checked_duration_since(start).unwrap()

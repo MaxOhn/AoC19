@@ -1,5 +1,5 @@
 
-use aoc19::Solution;
+use crate::solution::Solution;
 
 pub fn solve(input: String) -> Solution<i32, i32> {
     let intcodes: Vec<i32> = input.split(",")

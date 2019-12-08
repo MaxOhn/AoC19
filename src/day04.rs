@@ -1,5 +1,5 @@
 
-use aoc19::Solution;
+use crate::solution::Solution;
 
 use std::cmp::Ordering;
 

@@ -1,5 +1,5 @@
 
-use aoc19::Solution;
+use crate::solution::Solution;
 
 pub fn solve(input: String) -> Solution<i32, i32> {
     let (mut p1, mut p2) = (0, 0);
