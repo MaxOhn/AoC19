@@ -10,13 +10,14 @@ mod day04;
 mod day05;
 mod day06;
 mod day07;
+mod day08;
 
 use std::fs;
 use std::env;
 use std::time::Instant;
 
 fn main() {
-    let days = vec![1, 2, 3, 4, 5, 6, 7];
+    let days = vec![1, 2, 3, 4, 5, 6, 7, 8];
 
     let day: i32 = if let Some(arg) = env::args().nth(1) {
         arg.parse().unwrap_or(*days.last().unwrap())
@@ -37,6 +38,10 @@ fn main() {
             5 => format!("{:?}", day05::solve(input)),
             6 => format!("{:?}", day06::solve(input)),
             7 => format!("{:?}", day07::solve(input)),
+            8 => {
+                let (p1, p2) = day08::solve(input);
+                format!("{},\n{}", p1, p2)
+            },
             _ => panic!("Error: Invalid day"),
         },
         Instant::now().checked_duration_since(start).unwrap()
