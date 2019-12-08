@@ -1,32 +1,32 @@
 
+use aoc19::Solution;
+
 use itertools::Itertools;
 use std::fmt;
 use std::collections::HashMap;
 
-pub fn solve(input:String) -> (usize, String) {
-    solve_with_dimensions(input, 25, 6)
+pub fn solve(input:String) -> Solution<usize, String> {
+    let (p1, p2) = solve_with_dimensions(input, 25, 6);
+    Solution::new(p1, p2)
 } // 14.96ms
 
 pub fn solve_with_dimensions(input: String, width: usize, height: usize) -> (usize, String) {
     let layers: Vec<Layer> = input
         .chars()
-        .map(|digit| digit.to_digit(10).unwrap() as u8)
+        .map(|digit| digit.to_digit(10).unwrap() as usize)
         .chunks(width * height)
         .into_iter()
-        .map(|layer| Layer::new(layer.collect::<Vec<u8>>(), width))
+        .map(|layer| Layer::new(layer.collect::<Vec<usize>>(), width))
         .collect();
-    let counts = layers
+    let p1 = layers
         .iter()
-        .map(|layer| {
-            let mut num_map: HashMap<u8, usize> = HashMap::new();
-            for &d in &layer.data {
-                *num_map.entry(d).or_insert(0) += 1;
-            }
-            num_map
-        })
-        .min_by_key(|num_map| *num_map.get(&0).unwrap_or(&0))
-        .unwrap();
-    let p1 = counts.get(&1).unwrap_or(&0) * counts.get(&2).unwrap_or(&0);
+        .map(|layer| layer.digit_count())
+        .min_by_key(|count| *count.get(&0).unwrap_or(&0))
+        .unwrap()
+        .iter()
+        .filter(|(&digit, _)| digit != 0)
+        .map(|(_, &count)| count)
+        .product();
     let p2 = layers
         .iter()
         .skip(1)
@@ -37,22 +37,30 @@ pub fn solve_with_dimensions(input: String, width: usize, height: usize) -> (usi
 
 #[derive(Clone)]
 struct Layer {
-    data: Vec<u8>,
+    data: Vec<usize>,
     width: usize,
 }
 
 impl Layer {
-    fn new(data: Vec<u8>, width: usize) -> Self {
+    fn new(data: Vec<usize>, width: usize) -> Self {
         Layer { data, width }
     }
 
     fn stack(&self, other: &Layer) -> Self {
-        let data: Vec<u8> = self.data
+        let data: Vec<usize> = self.data
             .iter()
             .zip(other.data.iter())
             .map(|(&a, &b)| if a == 2 { b } else { a })
             .collect();
         Layer::new(data, self.width)
+    }
+
+    fn digit_count(&self) -> HashMap<usize, usize> {
+        let mut count: HashMap<usize, usize> = HashMap::new();
+        for &d in &self.data {
+            *count.entry(d).or_insert(0) += 1;
+        }
+        count
     }
 }
 
@@ -66,7 +74,7 @@ impl fmt::Display for Layer {
                         0 => '\u{2592}',
                         1 => '\u{2593}',
                         2 => '\u{2591}',
-                        _ => unreachable!(),
+                        _ => 'X',
                     })
                     .collect::<String>()
                 )
@@ -79,6 +87,13 @@ impl fmt::Display for Layer {
 fn example1() {
     let input = String::from("123456789012");
     assert_eq!(solve_with_dimensions(input, 3, 2).0, 1);
+}
+
+#[test]
+fn example2() {
     let input = String::from("0222112222120000");
-    assert_eq!(solve_with_dimensions(input, 2, 2).0, 4);
+    assert_eq!(
+        solve_with_dimensions(input, 2, 2), 
+        (4, String::from("\u{2592}\u{2593}\n\u{2593}\u{2592}"))
+    );
 }

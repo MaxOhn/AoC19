@@ -1,8 +1,10 @@
 
+use aoc19::Solution;
+
 use std::collections::HashMap;
  
 #[allow(dead_code)]
-pub fn solve(input: String) -> (i32, String) {
+pub fn solve(input: String) -> Solution<i32, String> {
     let (mut twice, mut thrice) = (0, 0);
     input.lines()
         .for_each(|line| {
@@ -20,12 +22,13 @@ pub fn solve(input: String) -> (i32, String) {
     for (i, w1) in input.lines().enumerate() {
         for w2 in input.lines().skip(i + 1) {
             if w1.chars().zip(w2.chars()).filter(|(a, b)| a != b).count() == 1 {
-                return (twice * thrice, 
-                    w1.chars()
-                        .zip(w2.chars())
-                        .filter(|(a, b)| a == b)
-                        .map(|(a, _)| a)
-                        .collect());
+                let p2 = w1
+                    .chars()
+                    .zip(w2.chars())
+                    .filter(|(a, b)| a == b)
+                    .map(|(a, _)| a)
+                    .collect();
+                return Solution::new(twice * thrice, p2);
             }
         }
     }
@@ -35,7 +38,7 @@ pub fn solve(input: String) -> (i32, String) {
 #[test]
 fn example1() {
     assert_eq!(
-        solve(String::from("abcdef\nbababc\nabbcde\nabcccd\naabcdd\nabcdee\nababab")).0,
+        solve(String::from("abcdef\nbababc\nabbcde\nabcccd\naabcdd\nabcdee\nababab")).part1,
         12
     );
 }
@@ -43,7 +46,7 @@ fn example1() {
 #[test]
 fn example2() {
     assert_eq!(
-        solve(String::from("abcde\nfghij\nklmno\npqrst\nfguij\naxcye\nwvxyz")).1,
+        solve(String::from("abcde\nfghij\nklmno\npqrst\nfguij\naxcye\nwvxyz")).part2,
         "fgij"
     );
 }

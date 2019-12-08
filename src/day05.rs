@@ -1,5 +1,7 @@
 
-pub fn solve(input: String) -> (i32, i32) {
+use aoc19::Solution;
+
+pub fn solve(input: String) -> Solution<i32, i32> {
     let intcodes: Vec<i32> = input.split(",")
         .map(|n| n.parse().unwrap())
         .collect();
@@ -11,7 +13,7 @@ pub fn solve(input: String) -> (i32, i32) {
         Some(result) => result,
         None => panic!("Error: Got None for part 2")
     };
-    (p1, p2)
+    Solution::new(p1, p2)
 } // 0.28ms
 
 struct Operation {

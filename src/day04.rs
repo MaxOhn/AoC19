@@ -1,7 +1,9 @@
 
+use aoc19::Solution;
+
 use std::cmp::Ordering;
 
-pub fn solve(input: String) -> (i32, i32) {
+pub fn solve(input: String) -> Solution<i32, i32> {
     let input_split: Vec<i32> = input.split("-")
         .map(|n| n.parse().unwrap())
         .collect();
@@ -15,7 +17,7 @@ pub fn solve(input: String) -> (i32, i32) {
             }
         }
     }
-    (p1, p2)
+    Solution::new(p1, p2)
 } // 39.78ms
 
 fn check_p1(n: i32) -> bool {

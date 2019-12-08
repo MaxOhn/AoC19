@@ -1,4 +1,6 @@
 
+use aoc19::Solution;
+
 use std::{
     cmp:: Ordering,
     collections::{BinaryHeap, HashMap, HashSet},
@@ -6,7 +8,7 @@ use std::{
 use itertools::Itertools;
 use cached::UnboundCache;
 
-pub fn solve(input: String) -> (usize, usize) {
+pub fn solve(input: String) -> Solution<usize, usize> {
     let planets: HashMap<Planet, Vec<Planet>> = input.lines()
         .flat_map(|line| line.split(")"))
         .tuples()
@@ -36,7 +38,7 @@ pub fn solve(input: String) -> (usize, usize) {
             })
         }).collect();
     let p2 = dijkstra("YOU", &total_links).get(&Planet::new("SAN")).unwrap() - 2;
-    (p1, p2)
+    Solution::new(p1, p2)
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
@@ -121,12 +123,12 @@ cached_key!{
 #[test]
 fn example1() {
     let input = String::from("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L");
-    assert_eq!(solve(input).0, 42);
+    assert_eq!(solve(input).part1, 42);
 }
 */
 
 #[test]
 fn example2() {
     let input = String::from("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN");
-    assert_eq!(solve(input), (54, 4));
+    assert_eq!(solve(input), Solution::new(54, 4));
 }

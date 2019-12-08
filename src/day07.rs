@@ -1,7 +1,9 @@
 
+use aoc19::Solution;
+
 use permutohedron::Heap;
 
-pub fn solve(input: String) -> (i32, i32) {
+pub fn solve(input: String) -> Solution<i32, i32> {
     let program: Vec<i32> = input.split(",")
         .map(|n| n.parse().unwrap())
         .collect();
@@ -33,7 +35,7 @@ pub fn solve(input: String) -> (i32, i32) {
             p2 = i32::max(p2, signal);
         }
     }
-    (p1, p2)
+    Solution::new(p1, p2)
 } // 3.75ms
 
 struct Amplifier {
@@ -98,4 +100,16 @@ impl Operation {
             _ => panic!("Error: opcode = {}", opcode)
         }
     }
+}
+
+#[test]
+fn example1() {
+    let input = String::from("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0");
+    assert_eq!(solve(input).part1, 43210);
+}
+
+#[test]
+fn example2() {
+    let input = String::from("3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5");
+    assert_eq!(solve(input).part2, 139629729);
 }

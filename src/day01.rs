@@ -1,5 +1,7 @@
 
-pub fn solve(input: String) -> (i32, i32) {
+use aoc19::Solution;
+
+pub fn solve(input: String) -> Solution<i32, i32> {
     let (mut p1, mut p2) = (0, 0);
     input.lines()
         .map(|line| line.parse::<i32>().unwrap())
@@ -11,14 +13,14 @@ pub fn solve(input: String) -> (i32, i32) {
                 n = n / 3 - 2;
             }
         });
-    (p1, p2)
+    Solution::new(p1, p2)
 } // 4.44ms
 
 #[test]
 fn example1() {
     assert_eq!(
         solve(String::from("14")),
-        (2, 2)
+        Solution::new(2, 2)
     );
 }
 
@@ -26,7 +28,7 @@ fn example1() {
 fn example2() {
     assert_eq!(
         solve(String::from("1969")),
-        (654, 966)
+        Solution::new(654, 966)
     );
 }
 
@@ -34,6 +36,6 @@ fn example2() {
 fn example3() {
     assert_eq!(
         solve(String::from("100756")),
-        (33583, 50346)
+        Solution::new(33583, 50346)
     );
 }

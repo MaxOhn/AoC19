@@ -1,5 +1,7 @@
 
-pub fn solve(input: String) -> (usize, usize) {
+use aoc19::Solution;
+
+pub fn solve(input: String) -> Solution<usize, usize> {
     let intcodes: Vec<usize> = input.split(",")
         .map(|n| n.parse().unwrap())
         .collect();
@@ -9,7 +11,7 @@ pub fn solve(input: String) -> (usize, usize) {
         for verb in 0..100 {
             memory = intcodes.clone();
             if run(noun, verb, &mut memory) == 19690720 {
-                return (p1, 100 * noun + verb);
+                return Solution::new(p1, 100 * noun + verb);
             }
         }
     }

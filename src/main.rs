@@ -28,20 +28,17 @@ fn main() {
         .expect("Error: Invalid day");
     let start = Instant::now();
     println!(
-        "[Day {}] Solution: {} [Elapsed time: {:?}]",
+        "[Day {}]\n{}\n[Elapsed time: {:?}]",
         day,
         match day {
-            1 => format!("{:?}", day01::solve(input)),
-            2 => format!("{:?}", day02::solve(input)),
-            3 => format!("{:?}", day03::solve(input)),
-            4 => format!("{:?}", day04::solve(input)),
-            5 => format!("{:?}", day05::solve(input)),
-            6 => format!("{:?}", day06::solve(input)),
-            7 => format!("{:?}", day07::solve(input)),
-            8 => {
-                let (p1, p2) = day08::solve(input);
-                format!("{},\n{}", p1, p2)
-            },
+            1 => day01::solve(input).to_string(),
+            2 => day02::solve(input).to_string(),
+            3 => day03::solve(input).to_string(),
+            4 => day04::solve(input).to_string(),
+            5 => day05::solve(input).to_string(),
+            6 => day06::solve(input).to_string(),
+            7 => day07::solve(input).to_string(),
+            8 => day08::solve(input).to_string(),
             _ => panic!("Error: Invalid day"),
         },
         Instant::now().checked_duration_since(start).unwrap()
