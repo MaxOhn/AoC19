@@ -58,19 +58,20 @@ impl Layer {
 
 impl fmt::Display for Layer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut result: String = String::new();
-        self.data
-            .chunks(self.width)
-            .for_each(|row| {
-                result.push_str(
-                    row.iter()
-                        .map(|digit| format!("{}", digit))
-                        .collect::<String>()
-                        .as_str()
-                );
-                result.push_str("\n");
-            });
-        write!(f, "{}", result.trim())
+        write!(f, "{}",
+            self.data
+                .chunks(self.width)
+                .map(|row| row.iter()
+                    .map(|digit| match digit {
+                        0 => '\u{2592}',
+                        1 => '\u{2593}',
+                        2 => '\u{2591}',
+                        _ => unreachable!(),
+                    })
+                    .collect::<String>()
+                )
+                .join("\n")
+        )
     }
 }
 
