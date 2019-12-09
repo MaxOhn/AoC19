@@ -1,7 +1,4 @@
 
-#[macro_use]
-extern crate cached;
-
 pub mod day01;
 pub mod day01_2018;
 pub mod day02;
