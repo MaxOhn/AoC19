@@ -1,6 +1,9 @@
 
 use crate::solution::Solution;
-use crate::util::Point;
+use crate::util::{
+    Point,
+    gcd,
+};
 
 pub fn solve(input: String) -> Solution<usize, i32> {
     let asteroids: Vec<Vec<bool>> = input
@@ -51,7 +54,7 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point, destroy_num: usize) -
     let h = asteroids.len();
     assert_eq!(w, h);
     // fractions (coordinates) from 0 to 1 with max denumerator max(station.x, station.y)
-    let mut coords = farey(i32::max(station.x, station.y));
+    let mut coords = farey(station.x.max(station.y));
     // extend by reciprocals (bottom right corner)
     coords.extend(coords.clone()
         .into_iter()
@@ -76,7 +79,7 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point, destroy_num: usize) -
     coords.pop();
     // matrix-coordinates have flipped y values
     coords = coords.into_iter().map(|p| Point::new(p.x, -p.y)).collect();
-    let mut destroy_order: Vec<Vec<Point>> = Vec::with_capacity(usize::max(w, h));
+    let mut destroy_order: Vec<Vec<Point>> = Vec::with_capacity(w.max(h));
     for &delta in &coords {
         let mut curr = station + delta;
         let mut rotation = 0;
@@ -93,14 +96,6 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point, destroy_num: usize) -
     }
     let result = *destroy_order.iter().flatten().take(destroy_num).last().unwrap();
     result.x * 100 + result.y
-}
-
-fn gcd(a: i32, b: i32) -> i32 {
-    if b == 0 {
-        a
-    } else {
-        gcd(b, a % b)
-    }
 }
 
 // generate fractions from 0 to 1 with max denumerator n

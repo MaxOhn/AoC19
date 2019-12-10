@@ -9,6 +9,14 @@ use std::{
     fmt,
 };
 
+pub(crate) fn gcd(a: i32, b: i32) -> i32 {
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
+} 
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub(crate) struct Point {
     pub x: i32,
