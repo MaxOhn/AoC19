@@ -1,4 +1,6 @@
 
+extern crate crossbeam;
+
 mod computer;
 pub mod day01;
 pub mod day01_2018;

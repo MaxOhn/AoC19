@@ -2,48 +2,59 @@
 use crate::solution::Solution;
 use crate::computer::Computer;
 
-use permutohedron::Heap;
+use std::thread;
+use itertools::Itertools;
+use std::sync::{
+    Arc,
+    Barrier,
+};
 
 pub fn solve(input: String) -> Solution<i64, i64> {
     let program: Vec<i64> = input.split(",")
         .map(|n| n.parse().unwrap())
         .collect();
+    let mut handles = Vec::new();
+    for i in 0..5 {
+        let handle = thread::spawn(move || {
+            // TODO
+        });
+        handles.push(handle);
+    }
+    let p1 = 0;
+    /*
     let mut p1 = 0;
-    let mut phases = vec![0, 1, 2, 3, 4];
-    let heap = Heap::new(&mut phases);
-    for permutation in heap {
+    for permutation in (0..5).permutations(5) {
         let mut amplifiers: Vec<Computer> = permutation
             .iter()
             .map(|&phase| {
                 let mut computer = Computer::new(program.clone());
-                computer.run_on_input(phase);
+                computer.insert(phase);
                 computer
             })
             .collect();
         let mut signal = 0;
         for amplifier in &mut amplifiers {
-            amplifier.run_on_input(signal);
-            signal = amplifier.get_output().unwrap();
+            signal = amplifier.insert(signal).pop();
         }
         p1 = i64::max(p1, signal);
     }
+    */
     let mut p2 = 0;
-    let mut phases = vec![5, 6, 7, 8, 9];
-    let heap = Heap::new(&mut phases);
-    for permutation in heap {
+    for permutation in (5..10).permutations(5) {
         let mut amplifiers: Vec<Computer> = permutation
             .iter()
             .map(|&phase| {
                 let mut computer = Computer::new(program.clone());
-                computer.run_on_input(phase);
+                computer.insert(phase);
                 computer
             })
             .collect();
         let mut idx = 0;
         let mut signal = 0;
         loop {
-            amplifiers[idx].run_on_input(signal);
-            match amplifiers[idx].get_output() {
+            /*
+            amplifiers[idx].insert(signal);
+            match amplifiers[idx].pop() {
                 Some(output) => {
                     signal = output;
                     idx = (idx + 1) % 5;
@@ -51,6 +62,8 @@ pub fn solve(input: String) -> Solution<i64, i64> {
                 },
                 None => break,
             }
+            */
+            break;
         }
     }
     Solution::new(p1, p2)

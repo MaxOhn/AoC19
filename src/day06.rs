@@ -9,6 +9,8 @@ use std::{
     },
 };
 
+type Relations = HashMap<usize, Vec<usize>>;
+
 pub fn solve(input: String) -> Solution<usize, usize> {
     let (ids, directed, undirected) = prepare_maps(input);
     let p1 = solve_part1(&directed, *ids.get("COM").unwrap());
@@ -16,10 +18,10 @@ pub fn solve(input: String) -> Solution<usize, usize> {
     Solution::new(p1, p2)
 }
 
-fn prepare_maps(input: String) -> (HashMap<String, usize>, HashMap<usize, Vec<usize>>, HashMap<usize, Vec<usize>>) {
+fn prepare_maps(input: String) -> (HashMap<String, usize>, Relations, Relations) {
     let mut ids: HashMap<String, usize> = HashMap::new();
-    let mut directed: HashMap<usize, Vec<usize>> = HashMap::new();
-    let mut undirected: HashMap<usize, Vec<usize>> = HashMap::new();
+    let mut directed: Relations = HashMap::new();
+    let mut undirected: Relations = HashMap::new();
     let mut id = 0;
     for line in input.lines() {
         let mut line_iter = line.split(")");
@@ -34,7 +36,7 @@ fn prepare_maps(input: String) -> (HashMap<String, usize>, HashMap<usize, Vec<us
     (ids, directed, undirected)
 }
 
-fn solve_part1(map: &HashMap<usize, Vec<usize>>, start: usize) -> usize {
+fn solve_part1(map: &Relations, start: usize) -> usize {
     let mut sum = 0;
     let mut depths = HashMap::new();
     let mut queue = VecDeque::new();
@@ -60,7 +62,7 @@ fn solve_part1(map: &HashMap<usize, Vec<usize>>, start: usize) -> usize {
     sum
 }
 
-fn solve_part2(map: &HashMap<usize, Vec<usize>>, start: usize, end: usize) -> Option<usize> {
+fn solve_part2(map: &Relations, start: usize, end: usize) -> Option<usize> {
     let mut depths = HashMap::new();
     let mut queue = VecDeque::new();
     let mut visited = HashSet::new();

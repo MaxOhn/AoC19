@@ -1,38 +1,35 @@
 
+use crossbeam::channel::{
+    RecvTimeoutError,
+    Sender,
+    Receiver,
+    self,
+};
+use std::time::Duration;
+
 pub(crate) struct Computer {
     memory: Vec<i64>,
     pc: usize,
-    pub rb: i32,
-    output: Vec<i64>
+    rb: i32,
+    input: Channel,
+    output: Channel,
 }
 
 impl Computer {
     pub fn new(memory: Vec<i64>) -> Self {
-        Computer { memory, pc: 0, rb: 0, output: Vec::new() }
-    }
-    
-    pub fn run_on_input(&mut self, input: i64) {
-        if self.memory[self.pc] == 99 { return; }
-        let input_pos = match (self.memory[self.pc] / 100) % 10 {
-            0 => self.memory[self.pc + 1] as usize,
-            2 => (self.rb + self.memory[self.pc + 1] as i32) as usize,
-            _ => unreachable!(),
-        };
-        while self.memory.len() <= input_pos {
-            self.memory.push(0);
-        }
-        self.memory[input_pos] = input;
-        self.pc += 2;
-        self.run()
+        Computer { memory, pc: 0, rb: 0, input: Channel::default(), output: Channel::default() }
     }
 
-    pub fn run(&mut self) {
-        if self.memory[self.pc] == 99 { return; }
+    pub fn run(&mut self) -> &mut Self {
+        if self.memory[self.pc] == 99 { return self; }
         while let Some(mut op) = Operation::new(&mut self.memory, self.pc, self.rb) {
             match op.opcode {
                 1 => self.memory[op.w] = op.v1 + op.v2,
                 2 => self.memory[op.w] = op.v1 * op.v2,
-                3 => break,
+                3 => {
+                    let input = self.input.pop();
+                    self.memory[op.w] = input;
+                },
                 4 => self.output.push(op.v1),
                 5 => op.pc = if op.v1 != 0 { op.v2 as usize } else { op.pc + 3 },
                 6 => op.pc = if op.v1 == 0 { op.v2 as usize } else { op.pc + 3 },
@@ -43,14 +40,58 @@ impl Computer {
             }
             self.pc = op.pc;
         }
+        self
     }
 
-    pub fn get_output(&mut self) -> Option<i64> {
+    pub fn pop(&mut self) -> i64 {
         self.output.pop()
+    }
+
+    pub fn insert(&mut self, input: i64) -> &mut Self {
+        self.input.push(input);
+        self
+    }
+
+    pub fn output_iter<'a>(&'a mut self) -> impl Iterator<Item = i64> + 'a {
+        self.output.iter()
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
+struct Channel {
+    sender: Sender<i64>,
+    receiver: Receiver<i64>,
+}
+
+impl Default for Channel {
+    fn default() -> Self {
+        let (sender, receiver) = channel::bounded(1024);
+        Channel { sender, receiver }
+    }
+}
+
+impl Channel {
+    fn push(&mut self, input: i64) {
+        self.sender.send(input).unwrap()
+    }
+
+    fn pop(&mut self) -> i64 {
+        match self.receiver.recv_timeout(Duration::from_secs(2)) {
+            Ok(output) => output,
+            Err(e) => {
+                match e {
+                    RecvTimeoutError::Timeout => panic!("Error: Timed out while waiting for a result"),
+                    _ => unreachable!(),
+                }
+            }
+        }
+    }
+
+    fn iter<'a>(&'a mut self) -> impl Iterator<Item = i64> + 'a {
+        self.receiver.try_iter()
+    }
+}
+
 struct Operation {
     opcode: i64,
     v1: i64,
@@ -67,10 +108,9 @@ impl Operation {
         }
         let opcode = mem[pc] % 100;
         if opcode == 99 { return None; }
-        let w_mode = (mem[pc] / 10000) % 10;
         if opcode == 3 {
-            let w = match w_mode {
-                0 => mem[pc + 3] as usize,
+            let w = match (mem[pc] / 100) % 10 {
+                0 => mem[pc + 1] as usize,
                 2 => (rb + mem[pc + 1] as i32) as usize,
                 _ => unreachable!(),
             };
@@ -79,6 +119,7 @@ impl Operation {
             }
             return Some(Operation { opcode, v1: 0, v2: 0, w, pc: pc + 2, rb });
         }
+
         let v1 = match (mem[pc] / 100) % 10 {
             0 => {
                 while mem.len() as i64 <= mem[pc + 1] {
@@ -119,7 +160,7 @@ impl Operation {
         };
         match opcode {
             1 | 2 | 7 | 8 => {
-                let w = match w_mode {
+                let w = match (mem[pc] / 10000) % 10 {
                     0 => mem[pc + 3] as usize,
                     2 => (rb + mem[pc + 3] as i32) as usize,
                     _ => unreachable!(),
