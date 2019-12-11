@@ -1,12 +1,7 @@
-
 #![allow(unused)]
 use std::{
-    ops::{
-        Add, Div, Mul, Sub,
-        AddAssign, SubAssign,
-        MulAssign, DivAssign,
-    },
     fmt,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
 pub(crate) fn gcd(a: i32, b: i32) -> i32 {
@@ -15,7 +10,7 @@ pub(crate) fn gcd(a: i32, b: i32) -> i32 {
     } else {
         gcd(b, a % b)
     }
-} 
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
 pub(crate) struct Point {
@@ -33,59 +28,71 @@ impl Point {
     }
 
     pub fn in_bounds(&self, low_x: i32, low_y: i32, high_x: i32, high_y: i32) -> bool {
-        low_x <= self.x && self.x <= high_x && low_y <= self.y && self.y <= high_y 
+        low_x <= self.x && self.x <= high_x && low_y <= self.y && self.y <= high_y
     }
 }
 
 impl Add for Point {
     type Output = Point;
     fn add(self, other: Point) -> Point {
-        Point { x: self.x + other.x, y: self.y + other.y }
+        Point {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
     }
 }
 
 impl Sub for Point {
     type Output = Point;
     fn sub(self, other: Point) -> Point {
-        Point { x: self.x - other.x, y: self.y - other.y }
+        Point {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
     }
 }
 
 impl Mul<i32> for Point {
     type Output = Point;
     fn mul(self, other: i32) -> Point {
-        Point { x: self.x * other, y: self.y * other }
+        Point {
+            x: self.x * other,
+            y: self.y * other,
+        }
     }
 }
 
 impl Div<i32> for Point {
     type Output = Point;
     fn div(self, other: i32) -> Point {
-        Point { x: self.x / other, y: self.y / other }
+        Point {
+            x: self.x / other,
+            y: self.y / other,
+        }
     }
 }
 
 impl AddAssign for Point {
     fn add_assign(&mut self, other: Self) {
-        *self = *self + other 
+        *self = *self + other
     }
 }
 
 impl SubAssign for Point {
     fn sub_assign(&mut self, other: Self) {
-        *self = *self + other 
+        *self = *self + other
     }
 }
 
 impl MulAssign<i32> for Point {
     fn mul_assign(&mut self, other: i32) {
-        *self = *self * other 
+        *self = *self * other
     }
 }
 
 impl DivAssign<i32> for Point {
     fn div_assign(&mut self, other: i32) {
-        *self = *self / other 
+        *self = *self / other
     }
 }
 

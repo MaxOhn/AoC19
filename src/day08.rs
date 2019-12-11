@@ -1,11 +1,10 @@
-
 use crate::solution::Solution;
 
 use itertools::Itertools;
-use std::fmt;
 use std::collections::HashMap;
+use std::fmt;
 
-pub fn solve(input:String) -> Solution<usize, String> {
+pub fn solve(input: String) -> Solution<usize, String> {
     let (p1, p2) = solve_with_dimensions(input, 25, 6);
     Solution::new(p1, p2)
 } // 14.96ms
@@ -47,7 +46,8 @@ impl Layer {
     }
 
     fn stack(&self, other: &Layer) -> Self {
-        let data: Vec<usize> = self.data
+        let data: Vec<usize> = self
+            .data
             .iter()
             .zip(other.data.iter())
             .map(|(&a, &b)| if a == 2 { b } else { a })
@@ -66,18 +66,20 @@ impl Layer {
 
 impl fmt::Display for Layer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}",
+        write!(
+            f,
+            "{}",
             self.data
                 .chunks(self.width)
-                .map(|row| row.iter()
+                .map(|row| row
+                    .iter()
                     .map(|digit| match digit {
                         0 => '\u{2592}',
                         1 => '\u{2593}',
                         2 => '\u{2591}',
                         _ => 'X',
                     })
-                    .collect::<String>()
-                )
+                    .collect::<String>())
                 .join("\n")
         )
     }
@@ -93,7 +95,7 @@ fn example1() {
 fn example2() {
     let input = String::from("0222112222120000");
     assert_eq!(
-        solve_with_dimensions(input, 2, 2), 
+        solve_with_dimensions(input, 2, 2),
         (4, String::from("\u{2592}\u{2593}\n\u{2593}\u{2592}"))
     );
 }

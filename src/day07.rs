@@ -1,15 +1,10 @@
-
+use crate::computer::Computer;
 use crate::solution::Solution;
-use crate::computer::{
-    Computer,
-};
 
 use itertools::Itertools;
 
 pub fn solve(input: String) -> Solution<i64, i64> {
-    let program: Vec<i64> = input.split(",")
-        .map(|n| n.parse().unwrap())
-        .collect();
+    let program: Vec<i64> = input.split(",").map(|n| n.parse().unwrap()).collect();
     let mut p1 = 0;
     for phases in (0..5).permutations(5) {
         let mut amplifiers: Vec<Computer> = phases
@@ -60,6 +55,8 @@ fn example1() {
 
 #[test]
 fn example2() {
-    let input = String::from("3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5");
+    let input = String::from(
+        "3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5",
+    );
     assert_eq!(solve(input).part2, 139629729);
 }

@@ -1,7 +1,5 @@
-
 extern crate crossbeam;
 
-mod util;
 mod computer;
 pub mod day01;
 pub mod day01_2018;
@@ -15,6 +13,7 @@ pub mod day07;
 pub mod day08;
 pub mod day09;
 pub mod day10;
+mod util;
 
 pub use self::solution::Solution;
 
@@ -33,8 +32,10 @@ pub mod solution {
         }
     }
 
-    impl<U, V> fmt::Display for Solution<U, V> 
-        where U: fmt::Display, V: fmt::Display
+    impl<U, V> fmt::Display for Solution<U, V>
+    where
+        U: fmt::Display,
+        V: fmt::Display,
     {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(f, "Part 1:\n{}\nPart 2:\n{}", self.part1, self.part2)

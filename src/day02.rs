@@ -1,10 +1,7 @@
-
 use crate::solution::Solution;
 
 pub fn solve(input: String) -> Solution<usize, usize> {
-    let intcodes: Vec<usize> = input.split(",")
-        .map(|n| n.parse().unwrap())
-        .collect();
+    let intcodes: Vec<usize> = input.split(",").map(|n| n.parse().unwrap()).collect();
     let mut memory = intcodes.clone();
     let p1 = run(12, 2, &mut memory);
     for noun in 0..100 {
@@ -28,7 +25,7 @@ fn run(noun: usize, verb: usize, memory: &mut [usize]) -> usize {
             99 => break memory[0],
             1 => memory[s] = memory[a1] + memory[a2],
             2 => memory[s] = memory[a1] * memory[a2],
-            _ => panic!("Something went wrong :(")
+            _ => panic!("Something went wrong :("),
         }
         i += 4;
     }
@@ -36,10 +33,7 @@ fn run(noun: usize, verb: usize, memory: &mut [usize]) -> usize {
 
 #[test]
 fn example1() {
-    let input = [1,9,10,3,2,3,11,0,99,30,40,50];
+    let input = [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
     let mut memory = input.clone();
-    assert_eq!(
-        run(9, 10, &mut memory),
-        3500
-    )
+    assert_eq!(run(9, 10, &mut memory), 3500)
 }

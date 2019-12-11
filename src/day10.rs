@@ -1,9 +1,5 @@
-
 use crate::solution::Solution;
-use crate::util::{
-    Point,
-    gcd,
-};
+use crate::util::{gcd, Point};
 
 pub fn solve(input: String) -> Solution<usize, i32> {
     let asteroids: Vec<Vec<bool>> = input
@@ -56,25 +52,31 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point, destroy_num: usize) -
     // fractions (coordinates) from 0 to 1 with max denumerator max(station.x, station.y)
     let mut coords = farey(station.x.max(station.y));
     // extend by reciprocals (bottom right corner)
-    coords.extend(coords.clone()
-        .into_iter()
-        .map(|p| Point::new(p.y, p.x))
-        .rev()
-        .skip(1)
+    coords.extend(
+        coords
+            .clone()
+            .into_iter()
+            .map(|p| Point::new(p.y, p.x))
+            .rev()
+            .skip(1),
     );
     // extent by negated denumerators (bottom left corner)
-    coords.extend(coords.clone()
-        .into_iter()
-        .map(|p| Point::new(p.x, -p.y))
-        .rev()
-        .skip(1)
+    coords.extend(
+        coords
+            .clone()
+            .into_iter()
+            .map(|p| Point::new(p.x, -p.y))
+            .rev()
+            .skip(1),
     );
     // extent by negated numerators (top left corner)
-    coords.extend(coords.clone()
-        .into_iter()
-        .map(|p| Point::new(-p.x, p.y))
-        .rev()
-        .skip(1)
+    coords.extend(
+        coords
+            .clone()
+            .into_iter()
+            .map(|p| Point::new(-p.x, p.y))
+            .rev()
+            .skip(1),
     );
     coords.pop();
     // matrix-coordinates have flipped y values
@@ -94,7 +96,12 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point, destroy_num: usize) -
             curr += delta;
         }
     }
-    let result = *destroy_order.iter().flatten().take(destroy_num).last().unwrap();
+    let result = *destroy_order
+        .iter()
+        .flatten()
+        .take(destroy_num)
+        .last()
+        .unwrap();
     result.x * 100 + result.y
 }
 

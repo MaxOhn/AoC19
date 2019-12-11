@@ -1,6 +1,5 @@
-
-use std::fs;
 use std::env;
+use std::fs;
 use std::time::Instant;
 
 use aoc19;
@@ -13,8 +12,8 @@ fn main() {
     } else {
         *days.last().unwrap()
     };
-    let input = fs::read_to_string(format!("inputs/day{:02}.txt", day))
-        .expect("Error: Invalid day");
+    let input =
+        fs::read_to_string(format!("inputs/day{:02}.txt", day)).expect("Error: Invalid day");
     let start = Instant::now();
     let solution = match day {
         1 => aoc19::day01::solve(input).to_string(),
@@ -31,7 +30,8 @@ fn main() {
         _ => panic!("Error: Invalid day"),
     };
     println!(
-        "[Day {}] Elapsed time: {:?}\n{}", day,
+        "[Day {}] Elapsed time: {:?}\n{}",
+        day,
         Instant::now().checked_duration_since(start).unwrap(),
         solution,
     );
