@@ -43,6 +43,16 @@ impl Computer {
         self
     }
 
+    pub fn set_input_channel(&mut self, input: Channel) -> &mut Self {
+        self.input = input;
+        self
+    }
+
+    pub fn set_output_channel(&mut self, output: Channel) -> &mut Self {
+        self.output = output;
+        self
+    }
+
     pub fn pop(&mut self) -> i64 {
         self.output.pop()
     }
@@ -58,7 +68,7 @@ impl Computer {
 }
 
 #[derive(Clone, Debug)]
-struct Channel {
+pub(crate) struct Channel {
     sender: Sender<i64>,
     receiver: Receiver<i64>,
 }

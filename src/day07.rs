@@ -1,6 +1,9 @@
 
 use crate::solution::Solution;
-use crate::computer::Computer;
+use crate::computer::{
+    Computer,
+    Channel,
+};
 
 use std::thread;
 use itertools::Itertools;
@@ -9,65 +12,95 @@ use std::sync::{
     Barrier,
 };
 
+use crossbeam::channel;
+
 pub fn solve(input: String) -> Solution<i64, i64> {
     let program: Vec<i64> = input.split(",")
         .map(|n| n.parse().unwrap())
         .collect();
+        
+    let (tx_out, rx_out) = channel::bounded(120);
     let mut handles = Vec::new();
+    let mut senders = Vec::new();
+    let barrier = Arc::new(Barrier::new(5));
     for i in 0..5 {
+        let (tx_in, rx_in) = channel::bounded(120);
+        senders.push(tx_in);
+        let program = program.clone();
+        let barrier = barrier.clone();
+        let tx_out = tx_out.clone();
         let handle = thread::spawn(move || {
-            // TODO
+            loop {
+                let (part, phase, input, output) = match rx_in.recv() {
+                    Ok(data) => data,
+                    Err(_) => break,
+                };
+                let mut computer = Computer::new(program.clone());
+                computer.set_input_channel(input)
+                    .set_output_channel(output)
+                    .insert(phase);
+                if i == 0 {
+                    computer.insert(0);
+                }
+                barrier.wait();
+                computer.run();
+                if i == 4 {
+                    let result = computer.pop();
+                    tx_out.send((part, result)).unwrap();
+                }
+            }
         });
         handles.push(handle);
     }
-    let p1 = 0;
-    /*
+
+    // Part 1
+    for phases in (0..5).permutations(5) {
+        let channels: Vec<_> = (0..5)
+            .map(|_| Channel::default())
+            .collect();
+        let mut outputs = (0..5).map(|i| channels[i].clone());
+        let mut inputs = (0..5).map(|i| channels[(i + 4) % 5].clone());
+        for i in 0..5 {
+            let output = outputs.next().unwrap();
+            let input = inputs.next().unwrap();
+            senders[i].send((1, phases[i], input, output)).unwrap();
+        }
+    }
+    // Part 2
+    for phases in (5..10).permutations(5) {
+        let channels: Vec<_> = (0..5)
+            .map(|_| Channel::default())
+            .collect();
+        let mut outputs = (0..5).map(|i| channels[i].clone());
+        let mut inputs = (0..5).map(|i| channels[(i + 4) % 5].clone());
+        for i in 0..5 {
+            let output = outputs.next().unwrap();
+            let input = inputs.next().unwrap();
+            senders[i].send((2, phases[i], input, output)).unwrap();
+        }
+    }
+
+    drop(senders);
+    drop(tx_out);
+
     let mut p1 = 0;
-    for permutation in (0..5).permutations(5) {
-        let mut amplifiers: Vec<Computer> = permutation
-            .iter()
-            .map(|&phase| {
-                let mut computer = Computer::new(program.clone());
-                computer.insert(phase);
-                computer
-            })
-            .collect();
-        let mut signal = 0;
-        for amplifier in &mut amplifiers {
-            signal = amplifier.insert(signal).pop();
-        }
-        p1 = i64::max(p1, signal);
-    }
-    */
     let mut p2 = 0;
-    for permutation in (5..10).permutations(5) {
-        let mut amplifiers: Vec<Computer> = permutation
-            .iter()
-            .map(|&phase| {
-                let mut computer = Computer::new(program.clone());
-                computer.insert(phase);
-                computer
-            })
-            .collect();
-        let mut idx = 0;
-        let mut signal = 0;
-        loop {
-            /*
-            amplifiers[idx].insert(signal);
-            match amplifiers[idx].pop() {
-                Some(output) => {
-                    signal = output;
-                    idx = (idx + 1) % 5;
-                    p2 = i64::max(p2, signal);
-                },
-                None => break,
-            }
-            */
-            break;
+
+    let mut iter = rx_out.iter();
+    while let Some((part, output)) = iter.next() {
+        match part {
+            1 => p1 = p1.max(output),
+            2 => p2 = p2.max(output),
+            _ => unreachable!(),
         }
     }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
     Solution::new(p1, p2)
-} // 10.73ms
+} // 186.36ms
 
 #[test]
 fn example1() {
