@@ -1,60 +1,56 @@
 
 use crate::solution::Solution;
-use crate::computer::Computer;
+use crate::computer::{
+    Computer,
+};
 
-use permutohedron::Heap;
+use itertools::Itertools;
 
 pub fn solve(input: String) -> Solution<i64, i64> {
     let program: Vec<i64> = input.split(",")
         .map(|n| n.parse().unwrap())
         .collect();
     let mut p1 = 0;
-    let mut phases = vec![0, 1, 2, 3, 4];
-    let heap = Heap::new(&mut phases);
-    for permutation in heap {
-        let mut amplifiers: Vec<Computer> = permutation
+    for phases in (0..5).permutations(5) {
+        let mut amplifiers: Vec<Computer> = phases
             .iter()
             .map(|&phase| {
                 let mut computer = Computer::new(program.clone());
-                computer.run_on_input(phase);
+                computer.insert(phase);
                 computer
             })
             .collect();
         let mut signal = 0;
         for amplifier in &mut amplifiers {
-            amplifier.run_on_input(signal);
-            signal = amplifier.get_output().unwrap();
+            amplifier.insert(signal).run();
+            signal = amplifier.pop();
         }
-        p1 = i64::max(p1, signal);
+        p1 = p1.max(signal);
     }
     let mut p2 = 0;
-    let mut phases = vec![5, 6, 7, 8, 9];
-    let heap = Heap::new(&mut phases);
-    for permutation in heap {
-        let mut amplifiers: Vec<Computer> = permutation
+    for phases in (5..10).permutations(5) {
+        let mut amplifiers: Vec<Computer> = phases
             .iter()
             .map(|&phase| {
                 let mut computer = Computer::new(program.clone());
-                computer.run_on_input(phase);
+                computer.insert(phase);
                 computer
             })
             .collect();
         let mut idx = 0;
         let mut signal = 0;
         loop {
-            amplifiers[idx].run_on_input(signal);
-            match amplifiers[idx].get_output() {
-                Some(output) => {
-                    signal = output;
-                    idx = (idx + 1) % 5;
-                    p2 = i64::max(p2, signal);
-                },
+            amplifiers[idx].insert(signal).run();
+            match amplifiers[idx].try_pop() {
+                Some(output) => signal = output,
                 None => break,
             }
+            p2 = p2.max(signal);
+            idx = (idx + 1) % 5;
         }
     }
     Solution::new(p1, p2)
-} // 10.73ms
+} // 203.3ms
 
 #[test]
 fn example1() {

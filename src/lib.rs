@@ -1,4 +1,6 @@
 
+extern crate crossbeam;
+
 mod util;
 mod computer;
 pub mod day01;
