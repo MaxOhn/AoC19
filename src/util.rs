@@ -1,7 +1,8 @@
 #![allow(unused)]
 use std::{
+    cmp::Ordering,
     fmt,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
 pub(crate) fn gcd(a: i32, b: i32) -> i32 {
@@ -12,29 +13,57 @@ pub(crate) fn gcd(a: i32, b: i32) -> i32 {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub(crate) struct Point {
-    pub x: i32,
-    pub y: i32,
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub(crate) struct Point<T> {
+    pub x: T,
+    pub y: T,
 }
 
-impl Point {
-    pub fn new(x: i32, y: i32) -> Self {
+impl<T> Point<T>
+where
+    T: Add<Output = T> + Ord + PartialOrd + Copy,
+{
+    pub fn new(x: T, y: T) -> Self {
         Point { x, y }
     }
 
-    pub fn manhatten(&self) -> i32 {
+    pub fn sum(&self) -> T {
         self.x + self.y
     }
 
-    pub fn in_bounds(&self, low_x: i32, low_y: i32, high_x: i32, high_y: i32) -> bool {
+    pub fn in_bounds(&self, low_x: T, low_y: T, high_x: T, high_y: T) -> bool {
         low_x <= self.x && self.x <= high_x && low_y <= self.y && self.y <= high_y
     }
 }
 
-impl Add for Point {
-    type Output = Point;
-    fn add(self, other: Point) -> Point {
+impl<T> Ord for Point<T>
+where
+    T: Ord + PartialOrd,
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.y != other.y {
+            self.y.cmp(&other.y)
+        } else {
+            self.x.cmp(&other.x)
+        }
+    }
+}
+
+impl<T> PartialOrd for Point<T>
+where
+    T: Ord + PartialOrd,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<T> Add for Point<T>
+where
+    T: Add<Output = T>,
+{
+    type Output = Point<T>;
+    fn add(self, other: Point<T>) -> Point<T> {
         Point {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -42,9 +71,12 @@ impl Add for Point {
     }
 }
 
-impl Sub for Point {
-    type Output = Point;
-    fn sub(self, other: Point) -> Point {
+impl<T> Sub for Point<T>
+where
+    T: Sub<Output = T>,
+{
+    type Output = Point<T>;
+    fn sub(self, other: Point<T>) -> Point<T> {
         Point {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -52,9 +84,12 @@ impl Sub for Point {
     }
 }
 
-impl Mul<i32> for Point {
-    type Output = Point;
-    fn mul(self, other: i32) -> Point {
+impl<T, U: Copy> Mul<U> for Point<T>
+where
+    T: Mul<U, Output = T>,
+{
+    type Output = Point<T>;
+    fn mul(self, other: U) -> Point<T> {
         Point {
             x: self.x * other,
             y: self.y * other,
@@ -62,9 +97,12 @@ impl Mul<i32> for Point {
     }
 }
 
-impl Div<i32> for Point {
-    type Output = Point;
-    fn div(self, other: i32) -> Point {
+impl<T, U: Copy> Div<U> for Point<T>
+where
+    T: Div<U, Output = T>,
+{
+    type Output = Point<T>;
+    fn div(self, other: U) -> Point<T> {
         Point {
             x: self.x / other,
             y: self.y / other,
@@ -72,31 +110,48 @@ impl Div<i32> for Point {
     }
 }
 
-impl AddAssign for Point {
+impl<T> AddAssign for Point<T>
+where
+    T: Add<Output = T> + Copy,
+{
     fn add_assign(&mut self, other: Self) {
         *self = *self + other
     }
 }
 
-impl SubAssign for Point {
+impl<T> SubAssign for Point<T>
+where
+    T: Sub<Output = T> + Copy,
+{
     fn sub_assign(&mut self, other: Self) {
-        *self = *self + other
+        *self = *self - other
     }
 }
 
-impl MulAssign<i32> for Point {
-    fn mul_assign(&mut self, other: i32) {
+impl<T, U> MulAssign<U> for Point<T>
+where
+    T: Mul<U, Output = T> + Copy,
+    U: Copy,
+{
+    fn mul_assign(&mut self, other: U) {
         *self = *self * other
     }
 }
 
-impl DivAssign<i32> for Point {
-    fn div_assign(&mut self, other: i32) {
+impl<T, U> DivAssign<U> for Point<T>
+where
+    T: Div<U, Output = T> + Copy,
+    U: Copy,
+{
+    fn div_assign(&mut self, other: U) {
         *self = *self / other
     }
 }
 
-impl fmt::Display for Point {
+impl<T> fmt::Display for Point<T>
+where
+    T: fmt::Display,
+{
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
     }

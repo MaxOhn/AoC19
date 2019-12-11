@@ -11,7 +11,7 @@ pub fn solve(input: String) -> Solution<usize, i32> {
     Solution::new(p1, p2)
 }
 
-fn solve_part1(asteroids: &Vec<Vec<bool>>) -> (usize, Point) {
+fn solve_part1(asteroids: &Vec<Vec<bool>>) -> (usize, Point<usize>) {
     let w = asteroids[0].len();
     let h = asteroids.len();
     let mut station = Point::default();
@@ -37,7 +37,7 @@ fn solve_part1(asteroids: &Vec<Vec<bool>>) -> (usize, Point) {
                 }
                 if sights > result {
                     result = sights;
-                    station = Point::new(x as i32, y as i32);
+                    station = Point::new(x, y);
                 }
             }
         }
@@ -45,12 +45,12 @@ fn solve_part1(asteroids: &Vec<Vec<bool>>) -> (usize, Point) {
     (result, station)
 }
 
-fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point, destroy_num: usize) -> i32 {
+fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point<usize>, destroy_num: usize) -> i32 {
     let w = asteroids[0].len();
     let h = asteroids.len();
     assert_eq!(w, h);
     // fractions (coordinates) from 0 to 1 with max denumerator max(station.x, station.y)
-    let mut coords = farey(station.x.max(station.y));
+    let mut coords = farey(station.x.max(station.y) as i32);
     // extend by reciprocals (bottom right corner)
     coords.extend(
         coords
@@ -81,7 +81,8 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point, destroy_num: usize) -
     coords.pop();
     // matrix-coordinates have flipped y values
     coords = coords.into_iter().map(|p| Point::new(p.x, -p.y)).collect();
-    let mut destroy_order: Vec<Vec<Point>> = Vec::with_capacity(w.max(h));
+    let station = Point::new(station.x as i32, station.y as i32);
+    let mut destroy_order: Vec<Vec<Point<i32>>> = Vec::with_capacity(w.max(h));
     for &delta in &coords {
         let mut curr = station + delta;
         let mut rotation = 0;
@@ -106,11 +107,10 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point, destroy_num: usize) -
 }
 
 // generate fractions from 0 to 1 with max denumerator n
-fn farey(n: i32) -> Vec<Point> {
+fn farey(n: i32) -> Vec<Point<i32>> {
     let mut ab = Point::new(0, 1);
     let mut cd = Point::new(1, n);
-    let mut sequence = Vec::new();
-    sequence.push(ab);
+    let mut sequence = vec![ab];
     while cd.x < n {
         let k = (n + ab.y) / cd.y;
         let old_cd = cd;
