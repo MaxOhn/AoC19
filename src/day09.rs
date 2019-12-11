@@ -18,13 +18,14 @@ fn solve_with_input(program: &Vec<i64>, computer_input: Option<i64>) -> String {
     computer.run();
     if let Some(input) = computer_input {
         computer.insert(input);
+        computer.run();
     }
     let result = computer
         .output_iter()
         .map(|output| output.to_string())
         .join(", ");
     result
-} // 114.91ms
+} // 103.28ms
 
 #[test]
 fn example1() {

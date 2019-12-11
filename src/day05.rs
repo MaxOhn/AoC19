@@ -7,11 +7,11 @@ pub fn solve(input: String) -> Solution<i64, i64> {
         .map(|n| n.parse().unwrap())
         .collect();
     let mut computer = Computer::new(intcodes.clone());
-    let p1 = computer.insert(1).run().pop();
+    let p1 = computer.insert(1).run().output_iter().last().unwrap();
     let mut computer = Computer::new(intcodes.clone());
     let p2 = computer.insert(5).run().pop();
     Solution::new(p1, p2)
-} // 0.46ms
+} // 0.77ms
 
 #[test]
 fn example1() {
