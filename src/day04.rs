@@ -58,16 +58,18 @@ fn check_p2(n: i32) -> bool {
     has_double || count == 2
 }
 
-#[test]
-fn example1() {
-    assert!(check_p1(111111));
-    assert!(!check_p1(223450));
-    assert!(!check_p1(123789));
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn example2() {
-    assert!(check_p2(112233));
-    assert!(!check_p2(123444));
-    assert!(check_p2(111122));
+    #[test]
+    fn test04() {
+        assert!(check_p1(111111));
+        assert!(!check_p1(223450));
+        assert!(!check_p1(123789));
+        assert!(check_p2(112233));
+        assert!(!check_p2(123444));
+        assert!(check_p2(111122));
+        crate::util::tests::test_full_problem(4, solve, 895, 591);
+    }
 }

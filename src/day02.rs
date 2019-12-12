@@ -31,9 +31,15 @@ fn run(noun: usize, verb: usize, memory: &mut [usize]) -> usize {
     }
 }
 
-#[test]
-fn example1() {
-    let input = [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
-    let mut memory = input.clone();
-    assert_eq!(run(9, 10, &mut memory), 3500)
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test02() {
+        let input = [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
+        let mut memory = input.clone();
+        assert_eq!(run(9, 10, &mut memory), 3500);
+        crate::util::tests::test_full_problem(2, solve, 3562624, 8298);
+    }
 }

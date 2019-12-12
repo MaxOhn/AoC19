@@ -33,24 +33,25 @@ pub fn solve(input: String) -> Solution<i32, String> {
     unreachable!();
 } // 114.77ms
 
-#[test]
-fn example1() {
-    assert_eq!(
-        solve(String::from(
-            "abcdef\nbababc\nabbcde\nabcccd\naabcdd\nabcdee\nababab"
-        ))
-        .part1,
-        12
-    );
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn example2() {
-    assert_eq!(
-        solve(String::from(
-            "abcde\nfghij\nklmno\npqrst\nfguij\naxcye\nwvxyz"
-        ))
-        .part2,
-        "fgij"
-    );
+    #[test]
+    fn test02() {
+        assert_eq!(
+            solve(String::from(
+                "abcdef\nbababc\nabbcde\nabcccd\naabcdd\nabcdee\nababab"
+            ))
+            .part1,
+            12
+        );
+        assert_eq!(
+            solve(String::from(
+                "abcde\nfghij\nklmno\npqrst\nfguij\naxcye\nwvxyz"
+            ))
+            .part2,
+            "fgij"
+        );
+    }
 }

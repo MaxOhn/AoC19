@@ -5,6 +5,25 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
+#[cfg(test)]
+pub(crate) mod tests {
+    use crate::solution::Solution;
+    use std::fmt::Debug;
+    use std::fs;
+
+    pub(crate) fn test_full_problem<F, U, V>(day: usize, solve_function: F, part1: U, part2: V)
+    where
+        F: Fn(String) -> Solution<U, V>,
+        U: Eq + Debug,
+        V: Eq + Debug,
+    {
+        let input = fs::read_to_string(format!("inputs/day{:02}.txt", day)).unwrap();
+        let solution = solve_function(input);
+        assert_eq!(solution.part1, part1);
+        assert_eq!(solution.part2, part2);
+    }
+}
+
 pub(crate) fn gcd(a: i32, b: i32) -> i32 {
     if b == 0 {
         a

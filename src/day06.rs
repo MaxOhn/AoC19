@@ -104,16 +104,18 @@ fn solve_part2(map: &Relations, start: usize, end: usize) -> Option<usize> {
     None
 }
 
-#[test]
-fn example1() {
-    let input = String::from("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L");
-    let (ids, map, _) = prepare_maps(input);
-    assert_eq!(solve_part1(&map, *ids.get("COM").unwrap()), 42);
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn example2() {
-    let input =
-        String::from("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN");
-    assert_eq!(solve(input), Solution::new(54, 4));
+    #[test]
+    fn test06() {
+        let input = String::from("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L");
+        let (ids, map, _) = prepare_maps(input);
+        assert_eq!(solve_part1(&map, *ids.get("COM").unwrap()), 42);
+        let input =
+            String::from("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN");
+        assert_eq!(solve(input), Solution::new(54, 4));
+        crate::util::tests::test_full_problem(6, solve, 453028, 562);
+    }
 }

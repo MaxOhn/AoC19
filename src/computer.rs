@@ -186,8 +186,8 @@ impl Operation {
                 2 => (rb + mem[pc + 1] as i32) as usize,
                 _ => unreachable!(),
             };
-            while mem.len() <= w {
-                mem.push(0);
+            if mem.len() <= w {
+                mem.resize(w + 1, 0);
             }
             return Some(Operation {
                 opcode,
@@ -201,15 +201,15 @@ impl Operation {
 
         let v1 = match (mem[pc] / 100) % 10 {
             0 => {
-                while mem.len() as i64 <= mem[pc + 1] {
-                    mem.push(0);
+                if mem.len() as i64 <= mem[pc + 1] {
+                    mem.resize(mem[pc + 1] as usize + 1, 0);
                 }
                 mem[mem[pc + 1] as usize]
             }
             1 => mem[pc + 1],
             2 => {
-                while mem.len() as i32 <= rb + mem[pc + 1] as i32 {
-                    mem.push(0);
+                if mem.len() as i32 <= rb + mem[pc + 1] as i32 {
+                    mem.resize((rb as i64 + mem[pc + 1]) as usize + 1, 0);
                 }
                 mem[(rb + mem[pc + 1] as i32) as usize]
             }
@@ -237,15 +237,15 @@ impl Operation {
         }
         let v2 = match (mem[pc] / 1000) % 10 {
             0 => {
-                while mem.len() as i64 <= mem[pc + 2] {
-                    mem.push(0);
+                if mem.len() as i64 <= mem[pc + 2] {
+                    mem.resize(mem[pc + 2] as usize + 1, 0);
                 }
                 mem[mem[pc + 2] as usize]
             }
             1 => mem[pc + 2],
             2 => {
-                while mem.len() as i32 <= rb + mem[pc + 2] as i32 {
-                    mem.push(0);
+                if mem.len() as i32 <= rb + mem[pc + 2] as i32 {
+                    mem.resize((rb + mem[pc + 2] as i32) as usize + 1, 0);
                 }
                 mem[(rb + mem[pc + 2] as i32) as usize]
             }
@@ -258,8 +258,8 @@ impl Operation {
                     2 => (rb + mem[pc + 3] as i32) as usize,
                     _ => unreachable!(),
                 };
-                while mem.len() <= w {
-                    mem.push(0);
+                if mem.len() <= w {
+                    mem.resize(w + 1, 0);
                 }
                 Some(Operation {
                     opcode,

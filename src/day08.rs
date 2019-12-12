@@ -74,9 +74,9 @@ impl fmt::Display for Layer {
                 .map(|row| row
                     .iter()
                     .map(|digit| match digit {
-                        0 => '\u{2592}',
-                        1 => '\u{2593}',
-                        2 => '\u{2591}',
+                        0 => ' ',
+                        1 => '\u{2588}',
+                        2 => ' ',
                         _ => 'X',
                     })
                     .collect::<String>())
@@ -85,17 +85,19 @@ impl fmt::Display for Layer {
     }
 }
 
-#[test]
-fn example1() {
-    let input = String::from("123456789012");
-    assert_eq!(solve_with_dimensions(input, 3, 2).0, 1);
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn example2() {
-    let input = String::from("0222112222120000");
-    assert_eq!(
-        solve_with_dimensions(input, 2, 2),
-        (4, String::from("\u{2592}\u{2593}\n\u{2593}\u{2592}"))
-    );
+    #[test]
+    fn test08() {
+        let input = String::from("123456789012");
+        assert_eq!(solve_with_dimensions(input, 3, 2).0, 1);
+        let input = String::from("0222112222120000");
+        assert_eq!(
+            solve_with_dimensions(input, 2, 2),
+            (4, String::from(" \u{2588}\n\u{2588} "))
+        );
+        crate::util::tests::test_full_problem(8, solve, 2480, String::from("████ █   ████  █    █  █ \n   █ █   ██  █ █    █  █ \n  █   █ █ ███  █    ████ \n █     █  █  █ █    █  █ \n█      █  █  █ █    █  █ \n████   █  ███  ████ █  █ "));
+    }
 }

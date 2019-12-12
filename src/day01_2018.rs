@@ -17,7 +17,12 @@ pub fn solve(input: String) -> Solution<i32, i32> {
     Solution::new(p1, p2.get())
 } // 236.41ms
 
-#[test]
-fn example1() {
-    assert_eq!(solve(String::from("+1\n-2\n+3\n+1")), Solution::new(3, 2));
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test01() {
+        assert_eq!(solve(String::from("+1\n-2\n+3\n+1")), Solution::new(3, 2));
+    }
 }

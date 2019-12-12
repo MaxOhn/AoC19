@@ -47,16 +47,18 @@ pub fn solve(input: String) -> Solution<i64, i64> {
     Solution::new(p1, p2)
 } // 203.3ms
 
-#[test]
-fn example1() {
-    let input = String::from("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0");
-    assert_eq!(solve(input).part1, 43210);
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn example2() {
-    let input = String::from(
-        "3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5",
-    );
-    assert_eq!(solve(input).part2, 139629729);
+    #[test]
+    fn test07() {
+        let input = String::from("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0");
+        assert_eq!(solve(input).part1, 43210);
+        let input = String::from(
+            "3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5",
+        );
+        assert_eq!(solve(input).part2, 139629729);
+        crate::util::tests::test_full_problem(7, solve, 65464, 1518124);
+    }
 }

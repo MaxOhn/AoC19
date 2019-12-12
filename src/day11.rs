@@ -49,8 +49,8 @@ pub fn solve(input: String) -> Solution<usize, String> {
                 .to_vec()
                 .iter()
                 .map(|num| match num {
-                    0 => '\u{2591}',
-                    1 => '\u{2593}',
+                    0 => ' ',
+                    1 => '\u{2588}',
                     _ => unreachable!(),
                 })
                 .join("")
@@ -131,4 +131,14 @@ enum Direction {
     Down,
     Left,
     Right,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test11() {
+        crate::util::tests::test_full_problem(11, solve, 2319, String::from("█  █ ████ ███  ███  ███  ████  ██    ██\n█  █ █    █  █ █  █ █  █ █    █  █    █\n█  █ ███  █  █ █  █ █  █ ███  █       █\n█  █ █    ███  ███  ███  █    █ ██    █\n█  █ █    █ █  █    █ █  █    █  █ █  █\n ██  ████ █  █ █    █  █ █     ███  ██ "));
+    }
 }
