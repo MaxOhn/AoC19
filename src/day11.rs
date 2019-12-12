@@ -1,6 +1,6 @@
 use crate::computer::Computer;
 use crate::solution::Solution;
-use crate::util::Point;
+use crate::util::Point2;
 
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
@@ -101,7 +101,7 @@ fn run(
     turn_right: &HashMap<Direction, Direction>,
 ) -> usize {
     let mut brain = Computer::new(program);
-    let mut pos = Point::new(grid.len() / 2, grid.len() / 2);
+    let mut pos = Point2::new(grid.len() / 2, grid.len() / 2);
     let mut dir = &Direction::Up;
     let mut visited = HashSet::new();
     loop {
