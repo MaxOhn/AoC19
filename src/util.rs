@@ -31,7 +31,10 @@ pub mod tests {
     }
 }
 
-pub fn gcd<T>(a: T, b: T) -> T  where T: Num + Copy {
+pub fn gcd<T>(a: T, b: T) -> T
+where
+    T: Num + Copy,
+{
     if b == T::zero() {
         a
     } else {
@@ -39,7 +42,10 @@ pub fn gcd<T>(a: T, b: T) -> T  where T: Num + Copy {
     }
 }
 
-pub fn lcm<T>(a: T, b: T) -> T where T: Num + Copy {
+pub fn lcm<T>(a: T, b: T) -> T
+where
+    T: Num + Copy,
+{
     a * b / gcd(a, b)
 }
 

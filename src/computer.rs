@@ -1,7 +1,7 @@
-use crossbeam::channel::{self, Receiver, RecvTimeoutError, Sender};
+use crossbeam::channel::{self, Receiver, RecvTimeoutError, SendTimeoutError, Sender};
 use std::time::Duration;
 
-pub(crate) struct Computer {
+pub struct Computer {
     memory: Vec<i64>,
     pc: usize,
     rb: i32,
@@ -119,21 +119,32 @@ enum State {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct Channel {
+pub struct Channel {
     sender: Sender<i64>,
     receiver: Receiver<i64>,
 }
 
 impl Default for Channel {
     fn default() -> Self {
-        let (sender, receiver) = channel::bounded(1024);
-        Channel { sender, receiver }
+        Channel::new(64)
     }
 }
 
 impl Channel {
+    pub fn new(size: usize) -> Self {
+        let (sender, receiver) = channel::bounded(size);
+        Channel { sender, receiver }
+    }
+
     fn push(&mut self, input: i64) {
-        self.sender.send(input).unwrap()
+        if let Err(e) = self.sender.send_timeout(input, Duration::from_secs(2)) {
+            match e {
+                SendTimeoutError::Timeout(_) => {
+                    panic!("Error: Timed out while trying to push output to channel")
+                }
+                _ => unreachable!(),
+            }
+        }
     }
 
     fn try_pop(&mut self) -> Option<i64> {
