@@ -5,7 +5,7 @@ use std::time::Instant;
 use aoc19::*;
 
 fn main() {
-    let days = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    let days = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
     let day: i32 = if let Some(arg) = env::args().nth(1) {
         arg.parse().unwrap_or(*days.last().unwrap())
@@ -29,6 +29,7 @@ fn main() {
         11 => day11::solve(input).to_string(),
         12 => day12::solve(input).to_string(),
         13 => day13::solve(input).to_string(),
+        14 => day14::solve(input).to_string(),
         d if 0 < d && d < 26 => panic!("Error: Day {} not yet implemented", d),
         _ => panic!("Error: Invalid day"),
     };
