@@ -126,7 +126,7 @@ pub struct Channel {
 
 impl Default for Channel {
     fn default() -> Self {
-        Channel::new(64)
+        Channel::new(32)
     }
 }
 

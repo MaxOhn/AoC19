@@ -50,6 +50,7 @@ pub mod solution {
 pub mod util {
     #![allow(unused)]
 
+    use itertools::Itertools;
     use num::traits::{
         identities::{One, Zero},
         sign::{Signed, Unsigned},
@@ -58,7 +59,8 @@ pub mod util {
     use std::{
         cmp::Ordering,
         collections::{BTreeMap, HashMap, HashSet},
-        fmt,
+        fmt::{self, Display},
+        hash::Hash,
         iter::FromIterator,
         ops::{
             Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign,
@@ -69,7 +71,7 @@ pub mod util {
 
     #[cfg(test)]
     pub mod tests {
-        use crate::solution::Solution;
+        use crate::Solution;
         use std::fmt::Debug;
         use std::fs;
 
@@ -87,7 +89,7 @@ pub mod util {
         }
     }
 
-    /// Calculates the greatest common denominator of 2 numbers
+    /// Calculates the greatest common denominator of two numbers
     /// # Examples
     /// ```
     /// use aoc19::util::gcd;
@@ -106,7 +108,7 @@ pub mod util {
         }
     }
 
-    /// Calculates the least common multiple of 2 numbers
+    /// Calculates the least common multiple of two numbers
     /// # Examples
     /// ```
     /// use aoc19::util::lcm;
@@ -123,33 +125,262 @@ pub mod util {
 
     /// Store a grid in a `HashMap<Point2i, T>`.
     /// This way negative coordinates are more easily handled than with a grid of `Vec<Vec<T>>`
-    pub struct GridMap<T>(HashMap<Point2i, T>);
-
-    impl<T> Deref for GridMap<T> {
-        type Target = HashMap<Point2i, T>;
-        fn deref(&self) -> &Self::Target {
-            &self.0
-        }
+    #[derive(Clone, Eq, PartialEq, Debug)]
+    pub struct GridMap<T> {
+        grid: BTreeMap<Point2i, T>,
+        default: T,
     }
 
     impl<T> GridMap<T> {
-        pub fn new() -> Self {
-            GridMap(HashMap::new())
+        /// Create a new GridMap with a specified default element.
+        /// The default element serves as fallback symbol for all
+        /// coordinates inbetween contained positions when displaying the grid.
+        /// # Examples
+        /// ```
+        /// use aoc19::util::{GridMap, Point2i};
+        ///
+        /// let mut grid = GridMap::with_default(5);
+        /// grid.insert(Point2i::new(0, 0), 1);
+        /// grid.insert(Point2i::new(2, 0), 1);
+        /// assert_eq!(grid.to_string(), "151")
+        /// ```
+        pub fn with_default(default: T) -> Self {
+            GridMap {
+                grid: BTreeMap::new(),
+                default,
+            }
+        }
+
+        pub fn new() -> Self
+        where
+            T: Default,
+        {
+            Self::with_default(T::default())
+        }
+
+        /// Calculate the current width of the grid
+        /// # Examples
+        /// ```
+        /// use aoc19::util::{GridMap, Point2i};
+        ///
+        /// let mut grid = GridMap::new();
+        /// grid.insert(Point2i::new(-2, 3), 0);
+        /// grid.insert(Point2i::new(3, -1), 0);
+        /// assert_eq!(grid.get_width(), 6);
+        /// ```
+        pub fn get_width(&self) -> usize {
+            if self.grid.len() == 0 {
+                0
+            } else {
+                let mut min = i32::max_value();
+                let mut max = i32::min_value();
+                for Point2i { x, .. } in self.grid.keys() {
+                    if *x < min {
+                        min = *x;
+                    }
+                    if *x > max {
+                        max = *x;
+                    }
+                }
+                (max - min + 1) as usize
+            }
+        }
+
+        /// Calculate the current height of the grid
+        /// # Examples
+        /// ```
+        /// use aoc19::util::{GridMap, Point2i};
+        ///
+        /// let mut grid = GridMap::new();
+        /// grid.insert(Point2i::new(-2, 3), 0);
+        /// grid.insert(Point2i::new(3, -1), 0);
+        /// assert_eq!(grid.get_height(), 5);
+        /// ```
+        pub fn get_height(&self) -> usize {
+            if self.grid.len() == 0 {
+                0
+            } else {
+                let mut min = i32::max_value();
+                let mut max = i32::min_value();
+                for Point2i { x: _, y } in self.grid.keys() {
+                    if *y < min {
+                        min = *y;
+                    }
+                    if *y > max {
+                        max = *y;
+                    }
+                }
+                (max - min + 1) as usize
+            }
+        }
+
+        /// Get the smallest x coordinate of the grid that has a value.
+        /// ```
+        /// use aoc19::util::{GridMap, Point2i};
+        ///
+        /// let mut grid = GridMap::new();
+        /// grid.insert(Point2i::new(2, 3), 0);
+        /// grid.insert(Point2i::new(-1, 2), 0);
+        /// assert_eq!(grid.get_min_x(), -1);
+        /// ```
+        pub fn get_min_x(&self) -> i32 {
+            self.grid
+                .keys()
+                .map(|p| p.x)
+                .fold(i32::max_value(), |min, next| min.min(next))
+        }
+
+        /// Get the largest x coordinate of the grid that has a value.
+        /// Panics if the grid is empty.
+        /// ```
+        /// use aoc19::util::{GridMap, Point2i};
+        ///
+        /// let mut grid = GridMap::new();
+        /// grid.insert(Point2i::new(2, 3), 0);
+        /// grid.insert(Point2i::new(-1, 2), 0);
+        /// assert_eq!(grid.get_max_x(), 2);
+        /// ```
+        pub fn get_max_x(&self) -> i32 {
+            self.grid
+                .keys()
+                .map(|p| p.x)
+                .fold(i32::min_value(), |max, next| max.max(next))
+        }
+
+        /// Get the smallest y coordinate of the grid that has a value.
+        /// Panics if the grid is empty.
+        /// ```
+        /// use aoc19::util::{GridMap, Point2i};
+        ///
+        /// let mut grid = GridMap::new();
+        /// grid.insert(Point2i::new(2, 3), 0);
+        /// grid.insert(Point2i::new(-1, 2), 0);
+        /// assert_eq!(grid.get_min_y(), 2);
+        /// ```
+        pub fn get_min_y(&self) -> i32 {
+            self.grid.iter().next().unwrap().0.y
+        }
+
+        /// Get the largest y coordinate of the grid that has a value.
+        /// Panics if the grid is empty.
+        /// ```
+        /// use aoc19::util::{GridMap, Point2i};
+        ///
+        /// let mut grid = GridMap::new();
+        /// grid.insert(Point2i::new(2, 3), 0);
+        /// grid.insert(Point2i::new(-1, 2), 0);
+        /// assert_eq!(grid.get_max_y(), 3);
+        /// ```
+        pub fn get_max_y(&self) -> i32 {
+            self.grid.iter().last().unwrap().0.y
+        }
+
+        /// Set the default element for the grid.
+        /// The default element serves as fallback symbol for all
+        /// coordinates inbetween contained positions when displaying the grid.
+        /// The suggested alternative to `let g = GridMap::new(); g.set_default(x);`
+        /// is `let g = GridMap::with_default(5);`
+        /// # Examples
+        /// ```
+        /// use aoc19::util::{GridMap, Point2i};
+        ///
+        /// let mut grid = GridMap::new();
+        /// grid.set_default(5);
+        /// grid.insert(Point2i::new(0, 0), 1);
+        /// grid.insert(Point2i::new(2, 0), 1);
+        /// assert_eq!(grid.to_string(), "151")
+        /// ```
+        pub fn set_default(&mut self, default: T) {
+            self.default = default;
+        }
+
+        /// This method maps entries of the grid according to the mapping of a HashMap.
+        /// Panics if the mapping doesn't cover all grid values.
+        /// The default argument serves as fallback symbol for all
+        /// coordinates in the new GridMap inbetween inserted positions.
+        /// # Examples
+        /// ```
+        /// use std::collections::HashMap;
+        /// use aoc19::util::{Point2i, GridMap};
+        ///
+        /// let mut mapping = HashMap::new();
+        /// mapping.insert(0, ' ');
+        /// mapping.insert(1, '█');
+        /// let mut grid = GridMap::new();
+        /// grid.insert(Point2i::new(0, 0), 1); // becomes '█'
+        /// grid.insert(Point2i::new(1, 0), 0); // becomes ' '
+        /// let mapped_grid = grid.map_values(&mapping, None);
+        /// println!("{}", mapped_grid);
+        /// ```
+        pub fn map_values<U>(&self, mapping: &HashMap<T, U>, default: Option<U>) -> GridMap<U>
+        where
+            T: Eq + Hash + Display,
+            U: Clone + Default,
+        {
+            let grid = BTreeMap::from_iter(self.grid.iter().map(|(p, v)| {
+                (
+                    p.clone(),
+                    mapping
+                        .get(&v)
+                        .or_else(|| panic!("Could not find mapping for {}", v))
+                        .unwrap()
+                        .clone(),
+                )
+            }));
+            GridMap {
+                grid,
+                default: default.unwrap_or_else(|| U::default()),
+            }
+        }
+    }
+
+    impl<T> Deref for GridMap<T> {
+        type Target = BTreeMap<Point2i, T>;
+        fn deref(&self) -> &Self::Target {
+            &self.grid
         }
     }
 
     impl<T> DerefMut for GridMap<T> {
         fn deref_mut(&mut self) -> &mut Self::Target {
-            &mut self.0
+            &mut self.grid
         }
     }
 
-    impl<T> FromIterator<(Point2i, T)> for GridMap<T> {
+    impl<T> FromIterator<(Point2i, T)> for GridMap<T>
+    where
+        T: Default,
+    {
         fn from_iter<I>(iter: I) -> Self
         where
             I: IntoIterator<Item = (Point2i, T)>,
         {
-            GridMap(HashMap::from_iter(iter))
+            GridMap {
+                grid: BTreeMap::from_iter(iter),
+                default: T::default(),
+            }
+        }
+    }
+
+    impl<T> Display for GridMap<T>
+    where
+        T: Display + Copy + Clone,
+    {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            let mut matrix = vec![vec![self.default; self.get_width()]; self.get_height()];
+            let min_x = self.get_min_x();
+            let min_y = self.get_min_y();
+            for (p, v) in self.iter() {
+                matrix[(p.y - min_y) as usize][(p.x - min_x) as usize] = v.clone();
+            }
+            write!(
+                f,
+                "{}",
+                matrix
+                    .iter()
+                    .map(|row| row.iter().map(|e| e.to_string()).collect::<String>())
+                    .join("\n")
+            )
         }
     }
 
@@ -236,9 +467,9 @@ pub mod util {
         }
     }
 
-    impl<T> fmt::Display for Point2<T>
+    impl<T> Display for Point2<T>
     where
-        T: fmt::Display,
+        T: Display,
     {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(f, "{},{}", self.x, self.y)
@@ -361,15 +592,11 @@ pub mod util {
                 let x = T::from_str_radix(value.trim(), radix)?;
                 if let Some(value) = iter.next() {
                     let y = T::from_str_radix(value.trim(), radix)?;
-                    if let Some(value) = iter.next() {
-                        let z = T::from_str_radix(value.trim(), radix)?;
-                        if let None = iter.next() {
-                            return Ok(Point2 { x, y });
-                        }
+                    if let None = iter.next() {
+                        return Ok(Point2 { x, y });
                     }
                 }
             }
-
             if let Err(e) = T::from_str_radix("", radix) {
                 return Err(e);
             }
@@ -522,9 +749,9 @@ pub mod util {
         }
     }
 
-    impl<T> fmt::Display for Point3<T>
+    impl<T> Display for Point3<T>
     where
-        T: fmt::Display,
+        T: Display,
     {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             write!(f, "{},{},{}", self.x, self.y, self.z)
@@ -757,6 +984,48 @@ pub mod util {
         pub fn iter() -> std::slice::Iter<'static, Self> {
             static VALS: [Direction; 4] = [Direction::N, Direction::W, Direction::S, Direction::E];
             VALS.into_iter()
+        }
+
+        /// Get the direction when going to the left i.e. counter-clockwise
+        /// # Examples
+        /// use aoc19::util::Direction;
+        ///
+        /// assert_eq!(Direction::N.to_left(), Direction::W);
+        /// assert_eq!(Direction::E.to_left(), Direction::N);
+        pub fn to_left(&self) -> Self {
+            match self {
+                Direction::N => Direction::W,
+                Direction::W => Direction::S,
+                Direction::S => Direction::E,
+                Direction::E => Direction::N,
+            }
+        }
+
+        /// Get the direction when going to the right i.e. clockwise
+        /// # Examples
+        /// use aoc19::util::Direction;
+        ///
+        /// assert_eq!(Direction::N.to_right(), Direction::E);
+        /// assert_eq!(Direction::W.to_right(), Direction::N);
+        pub fn to_right(&self) -> Self {
+            match self {
+                Direction::N => Direction::E,
+                Direction::W => Direction::N,
+                Direction::S => Direction::W,
+                Direction::E => Direction::S,
+            }
+        }
+    }
+
+    impl From<char> for Direction {
+        fn from(c: char) -> Self {
+            match c {
+                'N' | 'n' | 'U' | 'u' => Direction::N,
+                'W' | 'w' | 'L' | 'l' => Direction::W,
+                'S' | 's' | 'D' | 'd' => Direction::S,
+                'E' | 'e' | 'R' | 'r' => Direction::E,
+                _ => panic!("Cannot parse direction from char {}", c),
+            }
         }
     }
 }

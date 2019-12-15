@@ -1,4 +1,4 @@
-use crate::solution::Solution;
+use crate::Solution;
 
 use itertools::Itertools;
 use std::collections::HashMap;
@@ -75,7 +75,7 @@ impl fmt::Display for Layer {
                     .iter()
                     .map(|digit| match digit {
                         0 => ' ',
-                        1 => '\u{2588}',
+                        1 => '█',
                         2 => ' ',
                         _ => 'X',
                     })
@@ -96,7 +96,7 @@ mod tests {
         let input = String::from("0222112222120000");
         assert_eq!(
             solve_with_dimensions(input, 2, 2),
-            (4, String::from(" \u{2588}\n\u{2588} "))
+            (4, String::from(" █\n█ "))
         );
         crate::util::tests::test_full_problem(8, solve, 2480, String::from("████ █   ████  █    █  █ \n   █ █   ██  █ █    █  █ \n  █   █ █ ███  █    ████ \n █     █  █  █ █    █  █ \n█      █  █  █ █    █  █ \n████   █  ███  ████ █  █ "));
     }

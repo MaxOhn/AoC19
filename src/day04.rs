@@ -1,4 +1,4 @@
-use crate::solution::Solution;
+use crate::Solution;
 
 use std::cmp::Ordering;
 

@@ -1,4 +1,4 @@
-use crate::solution::Solution;
+use crate::Solution;
 
 pub fn solve(input: String) -> Solution<i32, i32> {
     let (mut p1, mut p2) = (0, 0);

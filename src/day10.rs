@@ -1,5 +1,7 @@
-use crate::solution::Solution;
-use crate::util::{gcd, Point2};
+use crate::{
+    util::{gcd, Point2, Point2i},
+    Solution,
+};
 
 pub fn solve(input: String) -> Solution<usize, i32> {
     let asteroids: Vec<Vec<bool>> = input
@@ -11,7 +13,7 @@ pub fn solve(input: String) -> Solution<usize, i32> {
     Solution::new(p1, p2)
 }
 
-fn solve_part1(asteroids: &Vec<Vec<bool>>) -> (usize, Point2<usize>) {
+fn solve_part1(asteroids: &[Vec<bool>]) -> (usize, Point2<usize>) {
     let w = asteroids[0].len();
     let h = asteroids.len();
     let mut station = Point2::default();
@@ -45,7 +47,7 @@ fn solve_part1(asteroids: &Vec<Vec<bool>>) -> (usize, Point2<usize>) {
     (result, station)
 }
 
-fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point2<usize>, destroy_num: usize) -> i32 {
+fn solve_part2(asteroids: &[Vec<bool>], station: Point2<usize>, destroy_num: usize) -> i32 {
     let w = asteroids[0].len();
     let h = asteroids.len();
     assert_eq!(w, h);
@@ -56,7 +58,7 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point2<usize>, destroy_num: 
         coords
             .clone()
             .into_iter()
-            .map(|p| Point2::new(p.y, p.x))
+            .map(|p| Point2i::new(p.y, p.x))
             .rev()
             .skip(1),
     );
@@ -65,7 +67,7 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point2<usize>, destroy_num: 
         coords
             .clone()
             .into_iter()
-            .map(|p| Point2::new(p.x, -p.y))
+            .map(|p| Point2i::new(p.x, -p.y))
             .rev()
             .skip(1),
     );
@@ -74,14 +76,17 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point2<usize>, destroy_num: 
         coords
             .clone()
             .into_iter()
-            .map(|p| Point2::new(-p.x, p.y))
+            .map(|p| Point2i::new(-p.x, p.y))
             .rev()
             .skip(1),
     );
     coords.pop();
     // matrix-coordinates have flipped y values
-    coords = coords.into_iter().map(|p| Point2::new(p.x, -p.y)).collect();
-    let station = Point2::new(station.x as i32, station.y as i32);
+    coords = coords
+        .into_iter()
+        .map(|p| Point2i::new(p.x, -p.y))
+        .collect();
+    let station = Point2i::new(station.x as i32, station.y as i32);
     let mut destroy_order: Vec<Vec<Point2<i32>>> = Vec::with_capacity(w.max(h));
     for &delta in &coords {
         let mut curr = station + delta;
@@ -107,14 +112,14 @@ fn solve_part2(asteroids: &Vec<Vec<bool>>, station: Point2<usize>, destroy_num: 
 }
 
 // generate fractions from 0 to 1 with max denumerator n
-fn farey(n: i32) -> Vec<Point2<i32>> {
-    let mut ab = Point2::new(0, 1);
-    let mut cd = Point2::new(1, n);
+fn farey(n: i32) -> Vec<Point2i> {
+    let mut ab = Point2i::new(0, 1);
+    let mut cd = Point2i::new(1, n);
     let mut sequence = vec![ab];
     while cd.x < n {
         let k = (n + ab.y) / cd.y;
         let old_cd = cd;
-        cd = Point2::new(k * cd.x - ab.x, k * cd.y - ab.y);
+        cd = Point2i::new(k * cd.x - ab.x, k * cd.y - ab.y);
         ab = old_cd;
         sequence.push(ab);
     }

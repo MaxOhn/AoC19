@@ -1,4 +1,4 @@
-use crate::solution::Solution;
+use crate::Solution;
 
 pub fn solve(input: String) -> Solution<usize, usize> {
     let intcodes: Vec<usize> = input.split(",").map(|n| n.parse().unwrap()).collect();
@@ -25,7 +25,7 @@ fn run(noun: usize, verb: usize, memory: &mut [usize]) -> usize {
             99 => break memory[0],
             1 => memory[s] = memory[a1] + memory[a2],
             2 => memory[s] = memory[a1] * memory[a2],
-            _ => panic!("Something went wrong :("),
+            _ => unreachable!(),
         }
         i += 4;
     }

@@ -1,5 +1,4 @@
-use crate::computer::Computer;
-use crate::solution::Solution;
+use crate::{computer::Computer, Solution};
 
 pub fn solve(input: String) -> Solution<i64, i64> {
     let intcodes: Vec<i64> = input.split(",").map(|n| n.parse().unwrap()).collect();

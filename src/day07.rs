@@ -1,5 +1,4 @@
-use crate::computer::Computer;
-use crate::solution::Solution;
+use crate::{computer::Computer, Solution};
 
 use itertools::Itertools;
 

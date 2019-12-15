@@ -33,7 +33,7 @@ fn produce_fuel(reactions: &HashMap<String, Reaction>, fuel: u64) -> u64 {
     let mut ore = 0;
     let mut extra = HashMap::new();
     let mut queue = Vec::new();
-    queue.push(ReactPair::new(fuel, "FUEL".to_owned()));
+    queue.push(Material::new(fuel, "FUEL".to_owned()));
     while !queue.is_empty() {
         let curr = queue.pop().unwrap();
         if curr.name == "ORE" {
@@ -56,7 +56,7 @@ fn produce_fuel(reactions: &HashMap<String, Reaction>, fuel: u64) -> u64 {
                         .map_or((), |e| *e += preparing - amount);
                 }
                 for input in &reaction.inputs {
-                    queue.push(ReactPair::new(input.amount * mult, input.name.clone()));
+                    queue.push(Material::new(input.amount * mult, input.name.clone()));
                 }
             }
         }
@@ -64,21 +64,21 @@ fn produce_fuel(reactions: &HashMap<String, Reaction>, fuel: u64) -> u64 {
     ore
 }
 
-#[derive(Debug, Hash, Eq, PartialEq, Clone)]
-struct ReactPair {
+#[derive(Hash, Eq, PartialEq)]
+struct Material {
     name: String,
     amount: u64,
 }
 
-impl ReactPair {
+impl Material {
     fn new(amount: u64, name: String) -> Self {
-        Self { name, amount }
+        Material { name, amount }
     }
 }
 
 struct Reaction {
-    inputs: HashSet<ReactPair>,
-    output: ReactPair,
+    inputs: HashSet<Material>,
+    output: Material,
 }
 
 impl Reaction {
@@ -87,13 +87,13 @@ impl Reaction {
         let mut split_arrow = line.split(" => ");
         split_arrow.next().unwrap().split(", ").for_each(|elem| {
             let mut elem = elem.split_whitespace();
-            inputs.insert(ReactPair::new(
+            inputs.insert(Material::new(
                 elem.next().unwrap().trim().parse().unwrap(),
                 elem.next().unwrap().trim().to_owned(),
             ));
         });
         let mut elem = split_arrow.next().unwrap().split_whitespace();
-        let output = ReactPair::new(
+        let output = Material::new(
             elem.next().unwrap().trim().parse().unwrap(),
             elem.next().unwrap().trim().to_owned(),
         );

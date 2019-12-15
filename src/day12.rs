@@ -1,7 +1,8 @@
-use crate::solution::Solution;
-use crate::util::Point3i;
+use crate::{
+    util::{lcm, Point3i},
+    Solution,
+};
 
-use num::Integer;
 use num::Signed;
 
 pub fn solve(input: String) -> Solution<i32, i64> {
@@ -46,7 +47,7 @@ fn solve_part2(moons: &mut [Moon]) -> i64 {
             z_loop = steps;
         }
         if x_loop > 0 && y_loop > 0 && z_loop > 0 {
-            return 2 * x_loop.lcm(&y_loop.lcm(&z_loop));
+            return 2 * lcm(lcm(x_loop, y_loop), z_loop);
         }
     }
 }
@@ -54,9 +55,7 @@ fn solve_part2(moons: &mut [Moon]) -> i64 {
 fn move_moons(moons: &mut [Moon]) {
     for i in 0..moons.len() {
         for j in i + 1..moons.len() {
-            let pos1 = moons[i].pos;
-            let pos2 = moons[j].pos;
-            let diff = (pos1 - pos2).restrict(-1, 1);
+            let diff = (moons[i].pos - moons[j].pos).restrict(-1, 1);
             moons[i].vel -= diff;
             moons[j].vel += diff;
         }

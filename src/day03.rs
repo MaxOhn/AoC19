@@ -1,70 +1,52 @@
-use crate::solution::Solution;
+use crate::{
+    util::{Direction, GridMap, Point2},
+    Solution,
+};
 
+use num::Signed;
 use std::cmp;
-use std::collections::HashMap;
-
-struct Element {
-    dir: char,
-    len: i32,
-}
-
-struct Wire {
-    elements: Vec<Element>,
-}
-
-impl Wire {
-    fn new(line: &str) -> Self {
-        Wire {
-            elements: {
-                line.split(',')
-                    .map(|elem| elem.split_at(1))
-                    .map(|(a, b)| Element {
-                        dir: a.parse().unwrap(),
-                        len: b.parse().unwrap(),
-                    })
-                    .collect()
-            },
-        }
-    }
-}
 
 pub fn solve(input: String) -> Solution<i32, i32> {
-    let wires: Vec<Wire> = input.lines().map(|line| Wire::new(line)).collect();
-    let mut seen_positions: HashMap<(i32, i32), i32> = HashMap::new();
-    follow_wire(&wires[0], &mut seen_positions, false);
-    let (p1, p2) = follow_wire(&wires[1], &mut seen_positions, true).unwrap();
+    let wires: Vec<Vec<(Direction, i32)>> = input
+        .lines()
+        .map(|line| {
+            line.split(',')
+                .map(|elem| elem.split_at(1))
+                .map(|(a, b)| {
+                    (
+                        Direction::from(a.chars().next().unwrap()),
+                        b.parse().unwrap(),
+                    )
+                })
+                .collect()
+        })
+        .collect();
+    let mut visited = GridMap::new();
+    follow_wire(&wires[0], &mut visited, false);
+    let (p1, p2) = follow_wire(&wires[1], &mut visited, true);
     Solution::new(p1, p2)
 } // 396.97ms
 
-fn follow_wire(
-    wire: &Wire,
-    seen_positions: &mut HashMap<(i32, i32), i32>,
-    output: bool,
-) -> Option<(i32, i32)> {
-    let (mut x, mut y, mut path) = (0, 0, 0);
+fn follow_wire(wire: &[(Direction, i32)], visited: &mut GridMap<i32>, output: bool) -> (i32, i32) {
+    let mut pos = Point2::new(0, 0);
+    let mut path = 0;
     let mut closest_cross = i32::max_value();
     let mut shortest_cross = i32::max_value();
-    for elem in &wire.elements {
-        for _ in 1..elem.len + 1 {
-            match &elem.dir {
-                'U' => x -= 1,
-                'D' => x += 1,
-                'L' => y -= 1,
-                'R' => y += 1,
-                _ => panic!("Found non-directional char"),
-            }
+    for (dir, len) in wire {
+        for _ in 1..len + 1 {
+            pos += dir.shift();
             path += 1;
             if output {
-                if seen_positions.contains_key(&(x, y)) {
-                    closest_cross = cmp::min(closest_cross, x.abs() + y.abs());
-                    shortest_cross = cmp::min(shortest_cross, path + seen_positions[&(x, y)]);
+                if visited.contains_key(&pos) {
+                    closest_cross = cmp::min(closest_cross, pos.abs().sum());
+                    shortest_cross = cmp::min(shortest_cross, path + visited[&pos]);
                 }
             } else {
-                seen_positions.entry((x, y)).or_insert(path);
+                visited.entry(pos).or_insert(path);
             }
         }
     }
-    Some((closest_cross, shortest_cross))
+    (closest_cross, shortest_cross)
 }
 
 #[cfg(test)]

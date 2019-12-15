@@ -1,6 +1,8 @@
-use crate::computer::Computer;
-use crate::solution::Solution;
-use crate::util::{Direction, GridMap, Point2i};
+use crate::{
+    computer::Computer,
+    util::{Direction, GridMap, Point2i},
+    Solution,
+};
 
 use std::collections::HashSet;
 
@@ -22,8 +24,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
             Direction::W => computer.insert(3),
             Direction::E => computer.insert(4),
         };
-        let res = computer.run().pop();
-        match res {
+        match computer.run().pop() {
             0 => {
                 grid.insert(curr_pos + curr_dir.shift(), 0);
             }
@@ -34,7 +35,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
             2 => {
                 curr_pos += curr_dir.shift();
                 oxy_pos = curr_pos;
-                grid.insert(curr_pos, 1);
+                grid.insert(curr_pos, 4);
             }
             _ => unreachable!(),
         }
@@ -53,15 +54,23 @@ pub fn solve(input: String) -> Solution<i32, i32> {
             grid.insert(curr_pos, 2);
             for &dir in Direction::iter() {
                 let next_pos = curr_pos + dir.shift();
-                if *grid.get(&next_pos).unwrap() == 1 {
+                if grid[&next_pos] == 1 {
                     curr_dir = dir;
                     found = true;
                     break;
                 }
             }
         }
-        // Grid fully discovered, start flooding
+        // Grid fully discovered, start DFS to flood
         if !found {
+            /*
+            let mut mapping = std::collections::HashMap::new();
+            mapping.insert(0, '█');
+            mapping.insert(2, ' ');
+            mapping.insert(5, 'O');
+            let draw_grid = grid.map_values(&mapping, Some(' '));
+            println!("Grid:\n{}", draw_grid);
+            */
             // Part 1
             let pos = Point2i::new(0, 0);
             let mut visited = HashSet::new();
@@ -71,7 +80,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
                 let (pos, dist) = backtrack.pop().unwrap();
                 for dir in Direction::iter() {
                     let next_pos = pos + dir.shift();
-                    if *grid.get(&next_pos).unwrap() != 0 {
+                    if grid[&next_pos] != 0 {
                         if !visited.contains(&next_pos) {
                             if next_pos == oxy_pos {
                                 p1 = dist + 1;
@@ -96,7 +105,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
                 grid.insert(pos, 3);
                 for dir in Direction::iter() {
                     let next_pos = pos + dir.shift();
-                    if *grid.get(&next_pos).unwrap() != 0 {
+                    if grid[&next_pos] != 0 {
                         if !visited.contains(&next_pos) {
                             visited.insert(next_pos);
                             backtrack.push((next_pos, m + 1));
