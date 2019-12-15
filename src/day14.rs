@@ -13,15 +13,15 @@ pub fn solve(input: String) -> Solution<u64, u64> {
     let p1 = produce_fuel(&reactions, 1);
     let mut bot = 0;
     let mut top = 1_000_000_000_000u64;
-    let mut p2 = 0;
+    let mut best = 0;
     loop {
         let fuel = bot + (top - bot) / 2;
         match produce_fuel(&reactions, fuel) {
             ore if ore <= 1_000_000_000_000 => {
-                if ore == p2 {
+                if ore == best {
                     return Solution::new(p1, fuel);
                 }
-                p2 = p2.max(ore);
+                best = best.max(ore);
                 bot += (top - bot) / 2;
             }
             _ => top -= (top - bot) / 2,
@@ -46,7 +46,7 @@ fn produce_fuel(reactions: &HashMap<String, Reaction>, fuel: u64) -> u64 {
             extra
                 .get_mut(&curr.name)
                 .map_or((), |e| *e = e.saturating_sub(used));
-            let amount = curr.amount.saturating_sub(used);
+            let amount = curr.amount - used;
             if amount > 0 {
                 let mult = (amount as f64 / reaction.output.amount as f64).ceil() as u64;
                 let preparing = reaction.output.amount * mult;
@@ -66,13 +66,13 @@ fn produce_fuel(reactions: &HashMap<String, Reaction>, fuel: u64) -> u64 {
 
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
 struct ReactPair {
-    amount: u64,
     name: String,
+    amount: u64,
 }
 
 impl ReactPair {
     fn new(amount: u64, name: String) -> Self {
-        Self { amount, name }
+        Self { name, amount }
     }
 }
 

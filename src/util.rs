@@ -7,10 +7,17 @@ use num::traits::{
 };
 use std::{
     cmp::Ordering,
+    collections::{HashMap, HashSet, BTreeMap},
     fmt,
-    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign},
+    iter::FromIterator,
+    ops::{
+        Add, AddAssign, Deref, DerefMut, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub,
+        SubAssign,
+    },
     str::FromStr,
 };
+
+/// ---- Tests -----
 
 #[cfg(test)]
 pub mod tests {
@@ -31,6 +38,8 @@ pub mod tests {
     }
 }
 
+/// ----- Auxiliary functions -----
+
 pub fn gcd<T>(a: T, b: T) -> T
 where
     T: Num + Copy,
@@ -48,6 +57,40 @@ where
 {
     a * b / gcd(a, b)
 }
+
+/// ----- Structs -----
+
+pub struct GridMap<T>(HashMap<Point2i, T>);
+
+impl<T> Deref for GridMap<T> {
+    type Target = HashMap<Point2i, T>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> GridMap<T> {
+    pub fn new() -> Self {
+        GridMap(HashMap::new())
+    }
+}
+
+impl<T> DerefMut for GridMap<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl<T> FromIterator<(Point2i, T)> for GridMap<T> {
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = (Point2i, T)>,
+    {
+        GridMap(HashMap::from_iter(iter))
+    }
+}
+
+/// ---------------
 
 pub type Point2i = Point2<i32>;
 pub type Point2us = Point2<usize>;
@@ -287,6 +330,8 @@ where
         <Self as Num>::from_str_radix(s, 10)
     }
 }
+
+/// ---------------
 
 pub type Point3i = Point3<i32>;
 pub type Point3us = Point3<usize>;
@@ -542,5 +587,31 @@ where
     type Err = <Self as Num>::FromStrRadixErr;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         <Self as Num>::from_str_radix(s, 10)
+    }
+}
+
+/// ---------------
+
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
+pub enum Direction {
+    N,
+    S,
+    W,
+    E,
+}
+
+impl Direction {
+    pub fn shift(&self) -> Point2i {
+        match self {
+            Direction::N => Point2i::new(-1, 0),
+            Direction::W => Point2i::new(0, -1),
+            Direction::S => Point2i::new(1, 0),
+            Direction::E => Point2i::new(0, 1),
+        }
+    }
+
+    pub fn iter() -> std::slice::Iter<'static, Self> {
+        static VALS: [Direction; 4] = [Direction::N, Direction::W, Direction::S, Direction::E];
+        VALS.into_iter()
     }
 }
