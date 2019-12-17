@@ -35,6 +35,7 @@ impl Computer {
         }
         if self.memory[self.pc] == 99 {
             self.state = State::Done;
+            println!("Computer done!");
             return self;
         }
         while let Some(mut op) = Operation::new(&mut self.memory, self.pc, self.rb) {
@@ -140,7 +141,7 @@ impl Channel {
         if let Err(e) = self.sender.send_timeout(input, Duration::from_secs(2)) {
             match e {
                 SendTimeoutError::Timeout(_) => {
-                    panic!("Error: Timed out while trying to push output to channel")
+                    panic!("Error: Timed out while trying to push into channel")
                 }
                 _ => unreachable!(),
             }

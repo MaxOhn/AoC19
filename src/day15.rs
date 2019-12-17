@@ -118,7 +118,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
         }
     }
     Solution::new(p1, p2)
-}
+} // 59.31ms
 
 #[cfg(test)]
 mod tests {

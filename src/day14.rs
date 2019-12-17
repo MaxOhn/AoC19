@@ -27,7 +27,7 @@ pub fn solve(input: String) -> Solution<u64, u64> {
             _ => top -= (top - bot) / 2,
         }
     }
-}
+} // 169.17ms
 
 fn produce_fuel(reactions: &HashMap<String, Reaction>, fuel: u64) -> u64 {
     let mut ore = 0;

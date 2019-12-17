@@ -75,7 +75,7 @@ pub fn solve(input: String) -> Solution<usize, i64> {
         println!("Game Over");
     }
     Solution::new(p1, p2)
-}
+} // 250.96ms
 
 fn read_stdin(grid: &GridMap<char>) -> i64 {
     println!("{}", grid);

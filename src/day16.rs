@@ -8,7 +8,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
     let p1 = solve_part1(signal.clone());
     let p2 = solve_part2(signal);
     Solution::new(p1, p2)
-}
+} // 7.42s
 
 fn solve_part1(mut signal: Vec<i32>) -> i32 {
     let mut next = vec![0; signal.len()];
@@ -17,9 +17,9 @@ fn solve_part1(mut signal: Vec<i32>) -> i32 {
             let mut sum = 0;
             for j in 0..signal.len() {
                 let pattern_elem = match (j + 1) % (4 * i) {
-                    x if x < i => 0,
+                    x if x < i => continue,
                     x if x < 2 * i => 1,
-                    x if x < 3 * i => 0,
+                    x if x < 3 * i => continue,
                     _ => -1,
                 };
                 sum += signal[j] * pattern_elem;
@@ -30,19 +30,17 @@ fn solve_part1(mut signal: Vec<i32>) -> i32 {
             signal[i] = next[i];
         }
     }
-    signal.iter().take(8).fold(0, |sum, &next| 10 * sum + next)
+    signal
+        .into_iter()
+        .take(8)
+        .fold(0, |sum, next| 10 * sum + next)
 }
 
 fn solve_part2(mut signal: Vec<i32>) -> i32 {
     let offset = signal[..7].iter().fold(0, |sum, &next| 10 * sum + next) as usize;
     assert!(offset > signal.len() / 2);
-    signal = signal
-        .iter()
-        .copied()
-        .rev()
-        .cycle()
-        .take(signal.len() * 10_000 - offset)
-        .collect();
+    let len = signal.len() * 10_000 - offset;
+    signal = signal.into_iter().rev().cycle().take(len).collect();
     for _ in 0..100 {
         signal = signal
             .iter()
@@ -53,10 +51,10 @@ fn solve_part2(mut signal: Vec<i32>) -> i32 {
             .collect();
     }
     signal
-        .iter()
+        .into_iter()
         .rev()
         .take(8)
-        .fold(0, |sum, &next| 10 * sum + next)
+        .fold(0, |sum, next| 10 * sum + next)
 }
 
 #[cfg(test)]

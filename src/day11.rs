@@ -23,7 +23,7 @@ pub fn solve(input: String) -> Solution<usize, String> {
         .map_values(&mapping, Some(' '))
         .to_string();
     Solution::new(p1, p2)
-}
+} // 69.16ms
 
 fn run(start: i64, program: Vec<i64>, grid: &mut GridMap<i64>) {
     let mut brain = Computer::new(program);

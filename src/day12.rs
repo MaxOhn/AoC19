@@ -10,7 +10,7 @@ pub fn solve(input: String) -> Solution<i32, i64> {
     let p1 = solve_part1(1000, &mut moons.iter().cloned().collect::<Vec<_>>());
     let p2 = solve_part2(&mut moons);
     Solution::new(p1, p2)
-}
+} // 231.14ms
 
 fn get_moons(input: String) -> Vec<Moon> {
     input

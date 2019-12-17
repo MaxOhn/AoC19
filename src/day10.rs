@@ -45,7 +45,7 @@ fn solve_part1(asteroids: &[Vec<bool>]) -> (usize, Point2<usize>) {
         }
     }
     (result, station)
-}
+} // 127.23ms
 
 fn solve_part2(asteroids: &[Vec<bool>], station: Point2<usize>, destroy_num: usize) -> i32 {
     let w = asteroids[0].len();
