@@ -89,6 +89,11 @@ fn target_17(c: &mut Criterion) {
     c.bench_function("day17", |b| b.iter(|| day17::solve(String::from(&input))));
 }
 
+fn target_18(c: &mut Criterion) {
+    let input = fs::read_to_string("inputs/day18.txt").unwrap();
+    c.bench_function("day18", |b| b.iter(|| day18::solve(String::from(&input))));
+}
+
 fn target_19(c: &mut Criterion) {
     let input = fs::read_to_string("inputs/day19.txt").unwrap();
     c.bench_function("day19", |b| b.iter(|| day19::solve(String::from(&input))));
@@ -100,7 +105,7 @@ criterion_group! {
     targets =   target_01, target_02, target_03, target_04, target_05,
                 target_06, target_07, target_08, target_09, target_10,
                 target_11, target_12, target_13, target_14, target_15,
-                target_16, target_17, target_19
+                target_16, target_17, target_18, target_19
 }
 
 criterion_main!(group);

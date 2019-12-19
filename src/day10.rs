@@ -27,7 +27,7 @@ fn solve_part1(asteroids: &[Vec<bool>]) -> (usize, Point2<usize>) {
                         let delta = Point2::new(cx as i32 - x as i32, cy as i32 - y as i32);
                         if gcd(delta.x.abs(), delta.y.abs()) == 1 {
                             let mut curr = Point2::new(cx as i32, cy as i32);
-                            while curr.in_bounds(0, 0, w as i32 - 1, h as i32 - 1) {
+                            while curr.in_bounds(0, 0, w as i32, h as i32) {
                                 if asteroids[curr.y as usize][curr.x as usize] {
                                     sights += 1;
                                     break;
@@ -91,7 +91,7 @@ fn solve_part2(asteroids: &[Vec<bool>], station: Point2<usize>, destroy_num: usi
     for &delta in &coords {
         let mut curr = station + delta;
         let mut rotation = 0;
-        while curr.in_bounds(0, 0, w as i32 - 1, h as i32 - 1) {
+        while curr.in_bounds(0, 0, w as i32, h as i32) {
             if asteroids[curr.y as usize][curr.x as usize] {
                 if destroy_order.len() <= rotation {
                     destroy_order.push(Vec::new());

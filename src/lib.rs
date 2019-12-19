@@ -20,6 +20,7 @@ pub mod day14;
 pub mod day15;
 pub mod day16;
 pub mod day17;
+pub mod day18;
 pub mod day19;
 
 pub use self::solution::Solution;
@@ -425,11 +426,11 @@ pub mod util {
         /// use aoc19::util::Point2;
         ///
         /// let p = Point2::new(4, 5);
-        /// assert!(p.in_bounds(0, 0, 5, 5));
-        /// assert!(!p.in_bounds(0, 0, 2, 8));
+        /// assert!(p.in_bounds(0, 0, 5, 6));
+        /// assert!(!p.in_bounds(0, 0, 5, 5));
         /// ```
         pub fn in_bounds(&self, low_x: T, low_y: T, high_x: T, high_y: T) -> bool {
-            low_x <= self.x && self.x <= high_x && low_y <= self.y && self.y <= high_y
+            low_x <= self.x && self.x < high_x && low_y <= self.y && self.y < high_y
         }
 
         /// Clamp x and y value inbetween a min and max
@@ -690,8 +691,8 @@ pub mod util {
         /// use aoc19::util::Point3;
         ///
         /// let p = Point3::new(4, 5, -2);
-        /// assert!(p.in_bounds(0, 0, -2, 5, 5, 3));
-        /// assert!(!p.in_bounds(0, 0, 0, 2, 8, 8));
+        /// assert!(p.in_bounds(0, 0, -2, 5, 6, 3));
+        /// assert!(!p.in_bounds(0, 0, -2, 5, 5, 3));
         /// ```
         pub fn in_bounds(
             &self,
@@ -703,11 +704,11 @@ pub mod util {
             high_z: T,
         ) -> bool {
             low_x <= self.x
-                && self.x <= high_x
+                && self.x < high_x
                 && low_y <= self.y
-                && self.y <= high_y
+                && self.y < high_y
                 && low_z <= self.z
-                && self.z <= high_z
+                && self.z < high_z
         }
 
         /// Clamp x, y, and z values inbetween a min and max
