@@ -35,7 +35,6 @@ impl Computer {
         }
         if self.memory[self.pc] == 99 {
             self.state = State::Done;
-            println!("Computer done!");
             return self;
         }
         while let Some(mut op) = Operation::new(&mut self.memory, self.pc, self.rb) {
