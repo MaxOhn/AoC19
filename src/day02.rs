@@ -1,13 +1,13 @@
 use crate::Solution;
 
 pub fn solve(input: String) -> Solution<usize, usize> {
-    let intcodes: Vec<usize> = input.split(",").map(|n| n.parse().unwrap()).collect();
+    let intcodes: Vec<usize> = input.split(',').map(|n| n.parse().unwrap()).collect();
     let mut memory = intcodes.clone();
     let p1 = run(12, 2, &mut memory);
     for noun in 0..100 {
         for verb in 0..100 {
             memory = intcodes.clone();
-            if run(noun, verb, &mut memory) == 19690720 {
+            if run(noun, verb, &mut memory) == 19_690_720 {
                 return Solution::new(p1, 100 * noun + verb);
             }
         }
@@ -40,6 +40,6 @@ mod tests {
         let input = [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
         let mut memory = input.clone();
         assert_eq!(run(9, 10, &mut memory), 3500);
-        crate::util::tests::test_full_problem(2, solve, 3562624, 8298);
+        crate::util::tests::test_full_problem(2, solve, 3_562_624, 8298);
     }
 }

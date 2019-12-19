@@ -3,7 +3,7 @@ use crate::{computer::Computer, Solution};
 use itertools::Itertools;
 
 pub fn solve(input: String) -> Solution<i64, i64> {
-    let program: Vec<i64> = input.split(",").map(|n| n.parse().unwrap()).collect();
+    let program: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
     let mut p1 = 0;
     for phases in (0..5).permutations(5) {
         let mut amplifiers: Vec<Computer> = phases

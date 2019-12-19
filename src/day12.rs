@@ -7,7 +7,7 @@ use num::Signed;
 
 pub fn solve(input: String) -> Solution<i32, i64> {
     let mut moons = get_moons(input);
-    let p1 = solve_part1(1000, &mut moons.iter().cloned().collect::<Vec<_>>());
+    let p1 = solve_part1(1000, &mut moons.to_vec());
     let p2 = solve_part2(&mut moons);
     Solution::new(p1, p2)
 } // 231.14ms
@@ -18,7 +18,7 @@ fn get_moons(input: String) -> Vec<Moon> {
         .map(|line| {
             line[1..line.len() - 1]
                 .split(", ")
-                .map(|split| split.split("=").last().unwrap().parse::<i32>().unwrap())
+                .map(|split| split.split('=').last().unwrap().parse::<i32>().unwrap())
                 .collect::<Vec<i32>>()
         })
         .map(|vec| Moon::new(vec[0], vec[1], vec[2]))

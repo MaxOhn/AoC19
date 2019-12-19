@@ -7,7 +7,7 @@ use crate::{
 use std::collections::HashSet;
 
 pub fn solve(input: String) -> Solution<i32, i32> {
-    let program: Vec<i64> = input.split(",").map(|n| n.parse().unwrap()).collect();
+    let program: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
     let mut computer = Computer::new(program);
     let mut curr_pos = Point2i::new(0, 0);
     let mut curr_dir = Direction::N;
@@ -80,16 +80,14 @@ pub fn solve(input: String) -> Solution<i32, i32> {
                 let (pos, dist) = backtrack.pop().unwrap();
                 for dir in Direction::iter() {
                     let next_pos = pos + dir.shift();
-                    if grid[&next_pos] != 0 {
-                        if !visited.contains(&next_pos) {
-                            if next_pos == oxy_pos {
-                                p1 = dist + 1;
-                                backtrack.clear();
-                                break;
-                            } else {
-                                visited.insert(next_pos);
-                                backtrack.push((next_pos, dist + 1));
-                            }
+                    if grid[&next_pos] != 0 && !visited.contains(&next_pos) {
+                        if next_pos == oxy_pos {
+                            p1 = dist + 1;
+                            backtrack.clear();
+                            break;
+                        } else {
+                            visited.insert(next_pos);
+                            backtrack.push((next_pos, dist + 1));
                         }
                     }
                 }
@@ -105,11 +103,9 @@ pub fn solve(input: String) -> Solution<i32, i32> {
                 grid.insert(pos, 3);
                 for dir in Direction::iter() {
                     let next_pos = pos + dir.shift();
-                    if grid[&next_pos] != 0 {
-                        if !visited.contains(&next_pos) {
-                            visited.insert(next_pos);
-                            backtrack.push((next_pos, m + 1));
-                        }
+                    if grid[&next_pos] != 0 && !visited.contains(&next_pos) {
+                        visited.insert(next_pos);
+                        backtrack.push((next_pos, m + 1));
                     }
                 }
             }

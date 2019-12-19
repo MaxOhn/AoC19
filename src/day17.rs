@@ -7,7 +7,7 @@ use itertools::Itertools;
 
 pub fn solve(input: String) -> Solution<usize, i64> {
     let mut program = input
-        .split(",")
+        .split(',')
         .map(|n| n.parse().unwrap())
         .collect::<Vec<i64>>();
     program[0] = 2;

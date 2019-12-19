@@ -33,7 +33,7 @@ fn follow_wire(wire: &[(Direction, i32)], visited: &mut GridMap<i32>, output: bo
     let mut closest_cross = i32::max_value();
     let mut shortest_cross = i32::max_value();
     for (dir, len) in wire {
-        for _ in 1..len + 1 {
+        for _ in 1..=*len {
             pos += dir.shift();
             path += 1;
             if output {

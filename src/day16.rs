@@ -11,24 +11,23 @@ pub fn solve(input: String) -> Solution<i32, i32> {
 } // 7.42s
 
 fn solve_part1(mut signal: Vec<i32>) -> i32 {
-    let mut next = vec![0; signal.len()];
+    let len = signal.len();
+    let mut next = vec![0; len];
     for _ in 0..100 {
-        for i in 1..=signal.len() {
+        for i in 1..=len {
             let mut sum = 0;
-            for j in 0..signal.len() {
+            for (j, s) in signal.iter().enumerate() {
                 let pattern_elem = match (j + 1) % (4 * i) {
                     x if x < i => continue,
                     x if x < 2 * i => 1,
                     x if x < 3 * i => continue,
                     _ => -1,
                 };
-                sum += signal[j] * pattern_elem;
+                sum += s * pattern_elem;
             }
             next[i - 1] = sum.abs() % 10;
         }
-        for i in 0..signal.len() {
-            signal[i] = next[i];
-        }
+        signal.clone_from_slice(&next[..len]);
     }
     signal
         .into_iter()

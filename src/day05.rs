@@ -1,7 +1,7 @@
 use crate::{computer::Computer, Solution};
 
 pub fn solve(input: String) -> Solution<i64, i64> {
-    let intcodes: Vec<i64> = input.split(",").map(|n| n.parse().unwrap()).collect();
+    let intcodes: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
     let mut computer = Computer::new(intcodes.clone());
     let p1 = computer.insert(1).run().output_iter().last().unwrap();
     let mut computer = Computer::new(intcodes.clone());

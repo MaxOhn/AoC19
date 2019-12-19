@@ -22,7 +22,7 @@ fn prepare_maps(input: String) -> (HashMap<String, usize>, Relations, Relations)
     let mut undirected: Relations = HashMap::new();
     let mut id = 0;
     for line in input.lines() {
-        let mut line_iter = line.split(")");
+        let mut line_iter = line.split(')');
         let center = *ids
             .entry(String::from(line_iter.next().unwrap()))
             .or_insert_with(|| {
@@ -37,15 +37,15 @@ fn prepare_maps(input: String) -> (HashMap<String, usize>, Relations, Relations)
             });
         directed
             .entry(center)
-            .or_insert_with(|| Vec::new())
+            .or_insert_with(Vec::new)
             .push(orbiter);
         undirected
             .entry(center)
-            .or_insert_with(|| Vec::new())
+            .or_insert_with(Vec::new)
             .push(orbiter);
         undirected
             .entry(orbiter)
-            .or_insert_with(|| Vec::new())
+            .or_insert_with(Vec::new)
             .push(center);
     }
     (ids, directed, undirected)

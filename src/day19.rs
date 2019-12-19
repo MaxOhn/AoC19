@@ -1,10 +1,7 @@
-use crate::{
-    Solution,
-    computer::Computer,
-};
+use crate::{computer::Computer, Solution};
 
 pub fn solve(input: String) -> Solution<usize, i64> {
-    let program: Vec<i64> = input.split(",").map(|n| n.parse().unwrap()).collect();
+    let program: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
     let mut p1 = 0;
     for x in 0..50 {
         for y in 0..50 {
@@ -26,8 +23,8 @@ pub fn solve(input: String) -> Solution<usize, i64> {
     }
 } // 584.81ms
 
-fn gets_pulled(program: &Vec<i64>, x: i64, y: i64) -> bool {
-    let mut drone = Computer::new(program.clone());
+fn gets_pulled(program: &[i64], x: i64, y: i64) -> bool {
+    let mut drone = Computer::new(program.to_owned());
     drone.insert(x).insert(y).run().pop() == 1
 }
 

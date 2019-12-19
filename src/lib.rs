@@ -129,7 +129,7 @@ pub mod util {
 
     /// Store a grid in a `HashMap<Point2i, T>`.
     /// This way negative coordinates are more easily handled than with a grid of `Vec<Vec<T>>`
-    #[derive(Clone, Eq, PartialEq, Debug)]
+    #[derive(Clone, Eq, PartialEq, Debug, Default)]
     pub struct GridMap<T> {
         grid: BTreeMap<Point2i, T>,
         default: T,
@@ -173,7 +173,7 @@ pub mod util {
         /// assert_eq!(grid.get_width(), 6);
         /// ```
         pub fn get_width(&self) -> usize {
-            if self.grid.len() == 0 {
+            if self.grid.is_empty() {
                 0
             } else {
                 let mut min = i32::max_value();
@@ -201,12 +201,12 @@ pub mod util {
         /// assert_eq!(grid.get_height(), 5);
         /// ```
         pub fn get_height(&self) -> usize {
-            if self.grid.len() == 0 {
+            if self.grid.is_empty() {
                 0
             } else {
                 let mut min = i32::max_value();
                 let mut max = i32::min_value();
-                for Point2i { x: _, y } in self.grid.keys() {
+                for Point2i { y, .. } in self.grid.keys() {
                     if *y < min {
                         min = *y;
                     }
@@ -323,7 +323,7 @@ pub mod util {
         {
             let grid = BTreeMap::from_iter(self.grid.iter().map(|(p, v)| {
                 (
-                    p.clone(),
+                    *p,
                     mapping
                         .get(&v)
                         .or_else(|| panic!("Could not find mapping for {}", v))
@@ -333,7 +333,7 @@ pub mod util {
             }));
             GridMap {
                 grid,
-                default: default.unwrap_or_else(|| U::default()),
+                default: default.unwrap_or_else(U::default),
             }
         }
     }
@@ -375,7 +375,7 @@ pub mod util {
             let min_x = self.get_min_x();
             let min_y = self.get_min_y();
             for (p, v) in self.iter() {
-                matrix[(p.y - min_y) as usize][(p.x - min_x) as usize] = v.clone();
+                matrix[(p.y - min_y) as usize][(p.x - min_x) as usize] = *v;
             }
             write!(
                 f,
@@ -596,7 +596,7 @@ pub mod util {
                 let x = T::from_str_radix(value.trim(), radix)?;
                 if let Some(value) = iter.next() {
                     let y = T::from_str_radix(value.trim(), radix)?;
-                    if let None = iter.next() {
+                    if iter.next().is_none() {
                         return Ok(Point2 { x, y });
                     }
                 }
@@ -887,7 +887,7 @@ pub mod util {
                     let y = T::from_str_radix(value.trim(), radix)?;
                     if let Some(value) = iter.next() {
                         let z = T::from_str_radix(value.trim(), radix)?;
-                        if let None = iter.next() {
+                        if iter.next().is_none() {
                             return Ok(Point3 { x, y, z });
                         }
                     }
@@ -967,7 +967,7 @@ pub mod util {
         /// assert_eq!(p.x, -3);
         /// assert_eq!(p.y, 3);
         /// ```
-        pub fn shift(&self) -> Point2i {
+        pub fn shift(self) -> Point2i {
             match self {
                 Direction::N => Point2i::new(0, -1),
                 Direction::W => Point2i::new(-1, 0),
@@ -987,7 +987,7 @@ pub mod util {
         /// ```
         pub fn iter() -> std::slice::Iter<'static, Self> {
             static VALS: [Direction; 4] = [Direction::N, Direction::W, Direction::S, Direction::E];
-            VALS.into_iter()
+            VALS.iter()
         }
 
         /// Get the direction when going to the left i.e. counter-clockwise
@@ -996,7 +996,7 @@ pub mod util {
         ///
         /// assert_eq!(Direction::N.to_left(), Direction::W);
         /// assert_eq!(Direction::E.to_left(), Direction::N);
-        pub fn to_left(&self) -> Self {
+        pub fn to_left(self) -> Self {
             match self {
                 Direction::N => Direction::W,
                 Direction::W => Direction::S,
@@ -1011,7 +1011,7 @@ pub mod util {
         ///
         /// assert_eq!(Direction::N.to_right(), Direction::E);
         /// assert_eq!(Direction::W.to_right(), Direction::N);
-        pub fn to_right(&self) -> Self {
+        pub fn to_right(self) -> Self {
             match self {
                 Direction::N => Direction::E,
                 Direction::W => Direction::N,

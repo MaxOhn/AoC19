@@ -3,7 +3,7 @@ use crate::Solution;
 use std::cmp::Ordering;
 
 pub fn solve(input: String) -> Solution<i32, i32> {
-    let input_split: Vec<i32> = input.split("-").map(|n| n.parse().unwrap()).collect();
+    let input_split: Vec<i32> = input.split('-').map(|n| n.parse().unwrap()).collect();
     let (min, max) = (input_split[0], input_split[1]);
     let (mut p1, mut p2) = (0, 0);
     for x in min..=max {

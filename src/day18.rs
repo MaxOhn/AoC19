@@ -12,48 +12,47 @@ pub fn solve(input: String) -> Solution<usize, usize> {
     Solution::new(p1, p2)
 } // 151.24s
 
-fn solve_part1(map: &Vec<Vec<char>>, all_keys: u32) -> usize {
-    let start_pos = get_entrances(&map)[0];
+fn solve_part1(map: &[Vec<char>], all_keys: u32) -> usize {
+    let start_pos = get_entrances(map)[0];
     let start = Cell::new(start_pos, 0);
-    bfs(
+    let path = bfs(
         &start,
         |Cell { pos, keys }| {
             get_neighbors(pos)
                 .iter()
-                .filter_map(|neighbor| {
-                    match map[neighbor.y][neighbor.x] {
-                        '#' => None,
-                        '.' | '@' => Some(Cell::new(*neighbor, *keys)),
-                        key if key.is_ascii_lowercase() => {
-                            let pos = key as u8 - 97;
-                            if (keys >> pos) & 1 == 1 {
-                                Some(Cell::new(*neighbor, *keys))
-                            } else {
-                                Some(Cell::new(*neighbor, keys + (1 << pos)))
-                            }
+                .filter_map(|neighbor| match map[neighbor.y][neighbor.x] {
+                    '#' => None,
+                    '.' | '@' => Some(Cell::new(*neighbor, *keys)),
+                    key if key.is_ascii_lowercase() => {
+                        let pos = key as u8 - 97;
+                        if (keys >> pos) & 1 == 1 {
+                            Some(Cell::new(*neighbor, *keys))
+                        } else {
+                            Some(Cell::new(*neighbor, keys + (1 << pos)))
                         }
-                        door if door.is_ascii_uppercase() => {
-                            let pos = door as u8 - 65;
-                            if (keys >> pos) & 1 == 1 {
-                                Some(Cell::new(*neighbor, *keys))
-                            } else {
-                                None
-                            }
-                        }
-                        _ => unreachable!(),
                     }
+                    door if door.is_ascii_uppercase() => {
+                        let pos = door as u8 - 65;
+                        if (keys >> pos) & 1 == 1 {
+                            Some(Cell::new(*neighbor, *keys))
+                        } else {
+                            None
+                        }
+                    }
+                    _ => unreachable!(),
                 })
                 .collect::<Vec<_>>()
         },
         |Cell { keys, .. }| *keys == all_keys,
     )
-    .unwrap().len() - 1
+    .unwrap();
+    path.len() - 1
 }
 
 fn solve_part2(map: &mut Vec<Vec<char>>, all_keys: u32) -> usize {
     let start_poss = get_entrances(&map);
     let start = Cells::new(start_poss, 0, None);
-    bfs(
+    let path = bfs(
         &start,
         |Cells { poss, keys, active }| {
             let mut successors: Vec<Cells> = Vec::new();
@@ -91,7 +90,8 @@ fn solve_part2(map: &mut Vec<Vec<char>>, all_keys: u32) -> usize {
         },
         |Cells { keys, .. }| *keys == all_keys,
     )
-    .unwrap().len() - 1
+    .unwrap();
+    path.len() - 1
 }
 
 fn parse_input(input: String) -> (Vec<Vec<char>>, u32) {
@@ -136,11 +136,11 @@ fn get_neighbors(pos: &Point2us) -> Vec<Point2us> {
     neighbors
 }
 
-fn get_entrances(map: &Vec<Vec<char>>) -> Vec<Point2us> {
+fn get_entrances(map: &[Vec<char>]) -> Vec<Point2us> {
     let mut entrances = Vec::new();
-    for y in 0..map.len() {
-        for x in 0..map[y].len() {
-            if map[y][x] == '@' {
+    for (y, row) in map.iter().enumerate() {
+        for (x, c) in row.iter().enumerate() {
+            if *c == '@' {
                 entrances.push(Point2us::new(x, y));
             }
         }
@@ -188,7 +188,7 @@ mod tests {
             .to_string();
         let (map, keys) = parse_input(input);
         assert_eq!(solve_part1(&map, keys), 86);
-        let input = 
+        let input =
             "########################\n#@..............ac.GI.b#\n###d#e#f################\n###A#B#C################\n###g#h#i################\n########################"
             .to_string();
         let (map, keys) = parse_input(input);

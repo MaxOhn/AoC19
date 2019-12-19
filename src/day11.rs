@@ -6,7 +6,7 @@ use crate::{
 use std::collections::HashMap;
 
 pub fn solve(input: String) -> Solution<usize, String> {
-    let program: Vec<i64> = input.split(",").map(|n| n.parse().unwrap()).collect();
+    let program: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
     let mut grid = GridMap::new();
     run(0, program.clone(), &mut grid);
     let p1 = grid.len();

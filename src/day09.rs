@@ -3,19 +3,20 @@ use crate::{computer::Computer, Solution};
 use itertools::Itertools;
 
 pub fn solve(input: String) -> Solution<String, String> {
-    let program: Vec<i64> = input.split(",").map(|n| n.parse().unwrap()).collect();
+    let program: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
     let p1 = solve_with_input(&program, Some(1));
     let p2 = solve_with_input(&program, Some(2));
     Solution::new(p1, p2)
 }
 
-fn solve_with_input(program: &Vec<i64>, computer_input: Option<i64>) -> String {
-    let mut computer = Computer::new(program.clone());
+fn solve_with_input(program: &[i64], computer_input: Option<i64>) -> String {
+    let mut computer = Computer::new(program.to_owned());
     computer.run();
     if let Some(input) = computer_input {
         computer.insert(input);
         computer.run();
     }
+    #[allow(clippy::let_and_return)]
     let result = computer
         .output_iter()
         .map(|output| output.to_string())
