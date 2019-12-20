@@ -1,9 +1,12 @@
-use crate::Solution;
+use crate::{Error, Solution};
 
 use std::cmp::Ordering;
 
-pub fn solve(input: String) -> Solution<i32, i32> {
-    let input_split: Vec<i32> = input.split('-').map(|n| n.parse().unwrap()).collect();
+pub fn solve(input: String) -> Result<Solution<i32, i32>, Error> {
+    let input_split: Vec<i32> = input
+        .split('-')
+        .map(|n| n.parse().map_err(Error::from))
+        .collect::<Result<Vec<_>, Error>>()?;
     let (min, max) = (input_split[0], input_split[1]);
     let (mut p1, mut p2) = (0, 0);
     for x in min..=max {
@@ -14,7 +17,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
             }
         }
     }
-    Solution::new(p1, p2)
+    Ok(Solution::new(p1, p2))
 } // 39.78ms
 
 fn check_p1(n: i32) -> bool {

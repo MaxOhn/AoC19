@@ -1,4 +1,5 @@
-extern crate crossbeam;
+#[macro_use]
+mod macros;
 
 mod computer;
 pub mod day01;
@@ -24,9 +25,37 @@ pub mod day18;
 pub mod day19;
 pub mod day20;
 
+pub use self::error::Error;
 pub use self::solution::Solution;
 
-pub mod solution {
+mod error {
+    use std::fmt;
+
+    #[derive(Debug)]
+    pub enum Error {
+        Custom(String),
+        ParseInt(std::num::ParseIntError),
+    }
+
+    impl From<std::num::ParseIntError> for Error {
+        fn from(e: std::num::ParseIntError) -> Self {
+            Self::ParseInt(e)
+        }
+    }
+
+    impl fmt::Display for Error {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match self {
+                Self::Custom(e) => write!(f, "{}", e),
+                Self::ParseInt(e) => write!(f, "{}", e),
+            }
+        }
+    }
+
+    impl std::error::Error for Error {}
+}
+
+mod solution {
     use std::fmt;
 
     #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -52,9 +81,10 @@ pub mod solution {
     }
 }
 
-pub mod util {
+mod util {
     #![allow(unused)]
 
+    use crate::error::Error;
     use itertools::Itertools;
     use num::traits::{
         identities::{One, Zero},
@@ -64,6 +94,7 @@ pub mod util {
     use std::{
         cmp::Ordering,
         collections::{BTreeMap, HashMap, HashSet},
+        convert::TryFrom,
         fmt::{self, Display},
         hash::Hash,
         iter::FromIterator,
@@ -76,6 +107,7 @@ pub mod util {
 
     #[cfg(test)]
     pub mod tests {
+        use crate::Error;
         use crate::Solution;
         use std::fmt::Debug;
         use std::fs;
@@ -83,12 +115,12 @@ pub mod util {
         /// Check whether the solution of a day still gives the correct answer
         pub fn test_full_problem<F, U, V>(day: usize, solve_function: F, part1: U, part2: V)
         where
-            F: Fn(String) -> Solution<U, V>,
+            F: Fn(String) -> Result<Solution<U, V>, Error>,
             U: Eq + Debug,
             V: Eq + Debug,
         {
             let input = fs::read_to_string(format!("inputs/day{:02}.txt", day)).unwrap();
-            let solution = solve_function(input);
+            let solution = solve_function(input).unwrap();
             assert_eq!(solution.part1, part1);
             assert_eq!(solution.part2, part2);
         }
@@ -219,58 +251,75 @@ pub mod util {
         /// let mut grid = GridMap::new();
         /// grid.insert(Point2i::new(2, 3), 0);
         /// grid.insert(Point2i::new(-1, 2), 0);
-        /// assert_eq!(grid.get_min_x(), -1);
+        /// assert_eq!(grid.get_min_x().unwrap(), -1);
         /// ```
-        pub fn get_min_x(&self) -> i32 {
-            self.grid
-                .keys()
-                .map(|p| p.x)
-                .fold(i32::max_value(), |min, next| min.min(next))
+        pub fn get_min_x(&self) -> Option<i32> {
+            if self.grid.is_empty() {
+                None
+            } else {
+                Some(
+                    self.grid
+                        .keys()
+                        .map(|p| p.x)
+                        .fold(i32::max_value(), |min, next| min.min(next)),
+                )
+            }
         }
 
         /// Get the largest x coordinate of the grid that has a value.
-        /// Panics if the grid is empty.
         /// ```
         /// use aoc19::util::{GridMap, Point2i};
         ///
         /// let mut grid = GridMap::new();
         /// grid.insert(Point2i::new(2, 3), 0);
         /// grid.insert(Point2i::new(-1, 2), 0);
-        /// assert_eq!(grid.get_max_x(), 2);
+        /// assert_eq!(grid.get_max_x().unwrap(), 2);
         /// ```
-        pub fn get_max_x(&self) -> i32 {
-            self.grid
-                .keys()
-                .map(|p| p.x)
-                .fold(i32::min_value(), |max, next| max.max(next))
+        pub fn get_max_x(&self) -> Option<i32> {
+            if self.grid.is_empty() {
+                None
+            } else {
+                Some(
+                    self.grid
+                        .keys()
+                        .map(|p| p.x)
+                        .fold(i32::min_value(), |max, next| max.max(next)),
+                )
+            }
         }
 
         /// Get the smallest y coordinate of the grid that has a value.
-        /// Panics if the grid is empty.
         /// ```
         /// use aoc19::util::{GridMap, Point2i};
         ///
         /// let mut grid = GridMap::new();
         /// grid.insert(Point2i::new(2, 3), 0);
         /// grid.insert(Point2i::new(-1, 2), 0);
-        /// assert_eq!(grid.get_min_y(), 2);
+        /// assert_eq!(grid.get_min_y().unwrap(), 2);
         /// ```
-        pub fn get_min_y(&self) -> i32 {
-            self.grid.iter().next().unwrap().0.y
+        pub fn get_min_y(&self) -> Option<i32> {
+            if self.grid.is_empty() {
+                None
+            } else {
+                Some(self.grid.iter().next().unwrap().0.y)
+            }
         }
 
         /// Get the largest y coordinate of the grid that has a value.
-        /// Panics if the grid is empty.
         /// ```
         /// use aoc19::util::{GridMap, Point2i};
         ///
         /// let mut grid = GridMap::new();
         /// grid.insert(Point2i::new(2, 3), 0);
         /// grid.insert(Point2i::new(-1, 2), 0);
-        /// assert_eq!(grid.get_max_y(), 3);
+        /// assert_eq!(grid.get_max_y().unwrap(), 3);
         /// ```
-        pub fn get_max_y(&self) -> i32 {
-            self.grid.iter().last().unwrap().0.y
+        pub fn get_max_y(&self) -> Option<i32> {
+            if self.grid.is_empty() {
+                None
+            } else {
+                Some(self.grid.iter().last().unwrap().0.y)
+            }
         }
 
         /// Set the default element for the grid.
@@ -293,7 +342,6 @@ pub mod util {
         }
 
         /// This method maps entries of the grid according to the mapping of a HashMap.
-        /// Panics if the mapping doesn't cover all grid values.
         /// The default argument serves as fallback symbol for all
         /// coordinates in the new GridMap inbetween inserted positions.
         /// # Examples
@@ -310,7 +358,11 @@ pub mod util {
         /// let mapped_grid = grid.map_values(&mapping, None);
         /// println!("{}", mapped_grid);
         /// ```
-        pub fn map_values<U>(&self, mapping: &HashMap<T, U>, default: Option<U>) -> GridMap<U>
+        pub fn map_values<U>(
+            &self,
+            mapping: &HashMap<T, U>,
+            default: Option<U>,
+        ) -> Result<GridMap<U>, Error>
         where
             T: Eq + Hash + Display,
             U: Clone + Default,
@@ -325,10 +377,10 @@ pub mod util {
                         .clone(),
                 )
             }));
-            GridMap {
+            Ok(GridMap {
                 grid,
                 default: default.unwrap_or_else(U::default),
-            }
+            })
         }
     }
 
@@ -367,16 +419,22 @@ pub mod util {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             let mut matrix = vec![vec![self.default; self.get_width()]; self.get_height()];
             let min_x = self.get_min_x();
+            if min_x.is_none() {
+                error!("Could not find min x to display GridMap");
+            }
             let min_y = self.get_min_y();
+            if min_y.is_none() {
+                error!("Could not find min y to display GridMap");
+            }
             for (p, v) in self.iter() {
-                matrix[(p.y - min_y) as usize][(p.x - min_x) as usize] = *v;
+                matrix[(p.y - min_y.unwrap()) as usize][(p.x - min_x.unwrap()) as usize] = *v;
             }
             write!(
                 f,
                 "{}",
                 matrix
                     .iter()
-                    .map(|row| row.iter().map(|e| e.to_string()).collect::<String>())
+                    .map(|row| row.iter().map(T::to_string).collect::<String>())
                     .join("\n")
             )
         }
@@ -1015,15 +1073,17 @@ pub mod util {
         }
     }
 
-    impl From<char> for Direction {
-        fn from(c: char) -> Self {
-            match c {
+    impl TryFrom<char> for Direction {
+        type Error = Error;
+        fn try_from(c: char) -> Result<Self, Self::Error> {
+            let direction = match c {
                 'N' | 'n' | 'U' | 'u' => Direction::N,
                 'W' | 'w' | 'L' | 'l' => Direction::W,
                 'S' | 's' | 'D' | 'd' => Direction::S,
                 'E' | 'e' | 'R' | 'r' => Direction::E,
-                _ => panic!("Cannot parse direction from char {}", c),
-            }
+                _ => bail!("Cannot parse direction from char {}", c),
+            };
+            Ok(direction)
         }
     }
 }
