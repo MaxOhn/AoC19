@@ -3,6 +3,7 @@ use crate::{
     util::{Direction, GridMap, Point2i},
     Solution,
 };
+use pathfinding::directed::astar::astar;
 use pathfinding::directed::bfs::bfs;
 use std::collections::HashMap;
 
@@ -11,7 +12,7 @@ pub fn solve(input: String) -> Solution<usize, usize> {
     let p1 = solve_part1(&maze, start, end);
     let p2 = solve_part2(&maze, start, end);
     Solution::new(p1, p2)
-} // 8.36s
+} // 2.86s
 
 fn solve_part1(maze: &GridMap<Cell>, start: Point2i, end: Point2i) -> usize {
     let path = bfs(
@@ -38,6 +39,44 @@ fn solve_part1(maze: &GridMap<Cell>, start: Point2i, end: Point2i) -> usize {
 }
 
 fn solve_part2(maze: &GridMap<Cell>, start: Point2i, end: Point2i) -> usize {
+    // Using A* (same interface as BFS but with heuristic and costs between cells)
+    let h = maze.get_height();
+    let path = astar(
+        &maze[&start],
+        |Cell {
+             pos, portal, level, ..
+         }| {
+            let mut neighbors = Vec::with_capacity(5);
+            for direction in Direction::iter() {
+                let neighbor = *pos + direction.shift();
+                if let Some(Cell { passage, .. }) = maze.get(&neighbor) {
+                    if *passage {
+                        let mut n_cell = maze[&neighbor];
+                        n_cell.level = *level;
+                        neighbors.push((n_cell, 1));
+                    }
+                }
+            }
+            if let Some((portal, outer)) = portal {
+                if *level != 0 || !outer {
+                    let mut portal_cell = maze[&portal];
+                    if *outer {
+                        portal_cell.level = level - 1;
+                    } else {
+                        portal_cell.level = level + 1;
+                    }
+                    neighbors.push((portal_cell, 1));
+                }
+            }
+            neighbors
+        },
+        |Cell { level, .. }| *level * h,
+        |Cell { pos, level, .. }| *level == 0 && *pos == end,
+    )
+    .unwrap();
+    path.1
+    /*
+    // Using BFS
     let path = bfs(
         &maze[&start],
         |Cell {
@@ -71,6 +110,7 @@ fn solve_part2(maze: &GridMap<Cell>, start: Point2i, end: Point2i) -> usize {
     )
     .unwrap();
     path.len() - 1
+    */
 }
 
 fn parse_maze(input: String) -> (GridMap<Cell>, Point2i, Point2i) {
