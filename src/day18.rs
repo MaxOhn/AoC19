@@ -106,7 +106,7 @@ fn parse_input(input: String) -> (Vec<Vec<char>>, u32) {
     (map, all_keys)
 }
 
-fn transform_map(map: &mut Vec<Vec<char>>) {
+fn transform_map(map: &mut [Vec<char>]) {
     let start = get_entrances(&map)[0];
     map[start.y][start.x] = '#';
     map[start.y - 1][start.x] = '#';
@@ -198,6 +198,11 @@ mod tests {
             .to_string();
         let (mut map, keys) = parse_input(input);
         assert_eq!(solve_part2(&mut map, keys), 72);
+    }
+
+    #[test]
+    #[ignore] // test takes much time
+    fn test18_actual() {
         crate::util::tests::test_full_problem(18, solve, 4420, 2128);
     }
 }

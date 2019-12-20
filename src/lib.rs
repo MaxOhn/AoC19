@@ -22,6 +22,7 @@ pub mod day16;
 pub mod day17;
 pub mod day18;
 pub mod day19;
+pub mod day20;
 
 pub use self::solution::Solution;
 
@@ -149,12 +150,13 @@ pub mod util {
         /// assert_eq!(grid.to_string(), "151")
         /// ```
         pub fn with_default(default: T) -> Self {
-            GridMap {
+            Self {
                 grid: BTreeMap::new(),
                 default,
             }
         }
 
+        /// Creates a new GridMap
         pub fn new() -> Self
         where
             T: Default,
@@ -204,16 +206,8 @@ pub mod util {
             if self.grid.is_empty() {
                 0
             } else {
-                let mut min = i32::max_value();
-                let mut max = i32::min_value();
-                for Point2i { y, .. } in self.grid.keys() {
-                    if *y < min {
-                        min = *y;
-                    }
-                    if *y > max {
-                        max = *y;
-                    }
-                }
+                let min = self.grid.keys().nth(0).unwrap().y;
+                let max = self.grid.keys().last().unwrap().y;
                 (max - min + 1) as usize
             }
         }
