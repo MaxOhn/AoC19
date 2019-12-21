@@ -91,7 +91,7 @@ mod solution {
     }
 }
 
-mod util {
+pub mod util {
     #![allow(unused)]
 
     use crate::error::Error;
@@ -356,17 +356,21 @@ mod util {
         /// coordinates in the new GridMap inbetween inserted positions.
         /// # Examples
         /// ```
+        /// # use aoc19::Error;
         /// use std::collections::HashMap;
         /// use aoc19::util::{Point2i, GridMap};
-        ///
+        /// 
+        /// # fn main() -> Result<(), Error> {
         /// let mut mapping = HashMap::new();
-        /// mapping.insert(0, ' ');
+        /// mapping.insert(0, 'x');
         /// mapping.insert(1, '█');
         /// let mut grid = GridMap::new();
         /// grid.insert(Point2i::new(0, 0), 1); // becomes '█'
-        /// grid.insert(Point2i::new(1, 0), 0); // becomes ' '
-        /// let mapped_grid = grid.map_values(&mapping, None);
-        /// println!("{}", mapped_grid);
+        /// grid.insert(Point2i::new(1, 0), 0); // becomes 'x'
+        /// let mapped_grid = grid.map_values(&mapping, None)?;
+        /// assert_eq!(mapped_grid.to_string(), "█x".to_string());
+        /// # Ok(())
+        /// # }
         /// ```
         pub fn map_values<U>(
             &self,
