@@ -8,7 +8,7 @@ use pathfinding::directed::bfs::bfs;
 use std::collections::HashMap;
 
 pub fn solve(input: String) -> Result<Solution<usize, usize>, Error> {
-    let (mut maze, start, end) = parse_maze(input)?;
+    let (maze, start, end) = parse_maze(input)?;
     let p1 = solve_part1(&maze, start, end)?;
     let p2 = solve_part2(&maze, start, end)?;
     Ok(Solution::new(p1, p2))
@@ -34,7 +34,7 @@ fn solve_part1(maze: &GridMap<Cell>, start: Point2i, end: Point2i) -> Result<usi
         },
         |Cell { pos, .. }| pos == &end,
     )
-    .ok_or_else(|| error!("No path found for part 1"))?;
+    .ok_or_else(|| error!("No path found for part1"))?;
     Ok(path.len() - 1)
 }
 
@@ -73,7 +73,7 @@ fn solve_part2(maze: &GridMap<Cell>, start: Point2i, end: Point2i) -> Result<usi
         |Cell { level, .. }| *level * h,
         |Cell { pos, level, .. }| *level == 0 && *pos == end,
     )
-    .ok_or_else(|| error!("No path found for part 2"))?;
+    .ok_or_else(|| error!("No path found for part2"))?;
     Ok(path.1)
 }
 

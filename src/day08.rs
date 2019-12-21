@@ -1,18 +1,21 @@
-use crate::Solution;
+use crate::{Error, Solution};
 
 use itertools::Itertools;
 use std::collections::HashMap;
 use std::fmt;
 
-pub fn solve(input: String) -> Solution<usize, String> {
-    let (p1, p2) = solve_with_dimensions(input, 25, 6);
-    Solution::new(p1, p2)
+pub fn solve(input: String) -> Result<Solution<usize, String>, Error> {
+    solve_with_dimensions(input, 25, 6)
 } // 14.96ms
 
-pub fn solve_with_dimensions(input: String, width: usize, height: usize) -> (usize, String) {
+pub fn solve_with_dimensions(
+    input: String,
+    width: usize,
+    height: usize,
+) -> Result<Solution<usize, String>, Error> {
     let layers: Vec<Layer> = input
         .chars()
-        .map(|digit| digit.to_digit(10).unwrap() as usize)
+        .map(|digit| digit as usize - '0' as usize)
         .chunks(width * height)
         .into_iter()
         .map(|layer| Layer::new(layer.collect::<Vec<usize>>(), width))
@@ -31,7 +34,7 @@ pub fn solve_with_dimensions(input: String, width: usize, height: usize) -> (usi
         .skip(1)
         .fold(layers[0].clone(), |stacked, layer| stacked.stack(layer))
         .to_string();
-    (p1, p2)
+    Ok(Solution::new(p1, p2))
 }
 
 #[derive(Clone)]
@@ -77,7 +80,7 @@ impl fmt::Display for Layer {
                         0 => ' ',
                         1 => '█',
                         2 => ' ',
-                        _ => 'X',
+                        _ => panic!("Found wrong digit: {}", digit), // TODO: Handle?
                     })
                     .collect::<String>())
                 .join("\n")
@@ -91,13 +94,11 @@ mod tests {
 
     #[test]
     fn test08() {
-        let input = String::from("123456789012");
-        assert_eq!(solve_with_dimensions(input, 3, 2).0, 1);
-        let input = String::from("0222112222120000");
+        let input = "0222112222120000".to_owned();
         assert_eq!(
-            solve_with_dimensions(input, 2, 2),
-            (4, String::from(" █\n█ "))
+            solve_with_dimensions(input, 2, 2).unwrap(),
+            Solution::new(4, " █\n█ ".to_owned())
         );
-        crate::util::tests::test_full_problem(8, solve, 2480, String::from("████ █   ████  █    █  █ \n   █ █   ██  █ █    █  █ \n  █   █ █ ███  █    ████ \n █     █  █  █ █    █  █ \n█      █  █  █ █    █  █ \n████   █  ███  ████ █  █ "));
+        crate::util::tests::test_full_problem(8, solve, 2480, "████ █   ████  █    █  █ \n   █ █   ██  █ █    █  █ \n  █   █ █ ███  █    ████ \n █     █  █  █ █    █  █ \n█      █  █  █ █    █  █ \n████   █  ███  ████ █  █ ".to_owned());
     }
 }

@@ -20,9 +20,9 @@ fn run() -> Result<(), Error> {
     ];
 
     let day: i32 = if let Some(arg) = env::args().nth(1) {
-        arg.parse().unwrap_or(*days.last()?)
+        arg.parse().unwrap_or(*days.last().unwrap())
     } else {
-        *days.last()?
+        *days.last().unwrap()
     };
     let input =
         fs::read_to_string(format!("inputs/day{:02}.txt", day)).expect("Error: Invalid day");
@@ -57,4 +57,5 @@ fn run() -> Result<(), Error> {
         Instant::now().checked_duration_since(start).unwrap(),
         solution,
     );
+    Ok(())
 }

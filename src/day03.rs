@@ -28,7 +28,7 @@ pub fn solve(input: String) -> Result<Solution<i32, i32>, Error> {
     follow_wire(&wires[0], &mut visited, false);
     let (p1, p2) = follow_wire(&wires[1], &mut visited, true);
     Ok(Solution::new(p1, p2))
-} // 396.97ms
+} // 777.47ms
 
 fn follow_wire(wire: &[(Direction, i32)], visited: &mut GridMap<i32>, output: bool) -> (i32, i32) {
     let mut pos = Point2::new(0, 0);
@@ -76,6 +76,6 @@ mod tests {
             .unwrap(),
             Solution::new(135, 410)
         );
-        crate::util::tests::test_full_problem(3, solve, 855, 11238);
+        crate::util::tests::test_full_problem(3, solve, 855, 11_238);
     }
 }

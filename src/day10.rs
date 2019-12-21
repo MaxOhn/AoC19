@@ -1,16 +1,16 @@
 use crate::{
     util::{gcd, Point2, Point2i},
-    Solution,
+    Error, Solution,
 };
 
-pub fn solve(input: String) -> Solution<usize, i32> {
+pub fn solve(input: String) -> Result<Solution<usize, i32>, Error> {
     let asteroids: Vec<Vec<bool>> = input
         .lines()
         .map(|line| line.chars().map(|c| c == '#').collect())
         .collect();
     let (p1, station) = solve_part1(&asteroids);
-    let p2 = solve_part2(&asteroids, station, 200);
-    Solution::new(p1, p2)
+    let p2 = solve_part2(&asteroids, station, 200)?;
+    Ok(Solution::new(p1, p2))
 }
 
 fn solve_part1(asteroids: &[Vec<bool>]) -> (usize, Point2<usize>) {
@@ -47,10 +47,16 @@ fn solve_part1(asteroids: &[Vec<bool>]) -> (usize, Point2<usize>) {
     (result, station)
 } // 127.23ms
 
-fn solve_part2(asteroids: &[Vec<bool>], station: Point2<usize>, destroy_num: usize) -> i32 {
+fn solve_part2(
+    asteroids: &[Vec<bool>],
+    station: Point2<usize>,
+    destroy_num: usize,
+) -> Result<i32, Error> {
     let w = asteroids[0].len();
     let h = asteroids.len();
-    assert_eq!(w, h);
+    if w != h {
+        bail!("w ({}) must be equal to h ({}) for part2 to work", w, h);
+    }
     // fractions (coordinates) from 0 to 1 with max denumerator max(station.x, station.y)
     let mut coords = farey(station.x.max(station.y) as i32);
     // extend by reciprocals (bottom right corner)
@@ -107,8 +113,8 @@ fn solve_part2(asteroids: &[Vec<bool>], station: Point2<usize>, destroy_num: usi
         .flatten()
         .take(destroy_num)
         .last()
-        .unwrap();
-    result.x * 100 + result.y
+        .ok_or_else(|| error!("Found no destroyed asteroids"))?;
+    Ok(result.x * 100 + result.y)
 }
 
 // generate fractions from 0 to 1 with max denumerator n
@@ -145,7 +151,7 @@ mod tests {
             .collect();
         assert_eq!(solve_part1(&asteroids), (41, Point2::new(6, 3)));
         let input = ".#..##.###...#######\n##.############..##.\n.#.######.########.#\n.###.#######.####.#.\n#####.##.#.##.###.##\n..#####..#.#########\n####################\n#.####....###.#.#.##\n##.#################\n#####.##.###..####..\n..######..##.#######\n####.##.####...##..#\n.#####..#.######.###\n##...#.##########...\n#.##########.#######\n.####.#.###.###.#.##\n....##.##.###..#####\n.#.#.###########.###\n#.#.#.#####.####.###\n###.##.####.##.#..##";
-        assert_eq!(solve(input.to_string()), Solution::new(210, 802));
+        assert_eq!(solve(input.to_owned()).unwrap(), Solution::new(210, 802));
         crate::util::tests::test_full_problem(10, solve, 344, 2732);
     }
 }

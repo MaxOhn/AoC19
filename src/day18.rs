@@ -1,18 +1,18 @@
 use crate::{
     util::{Direction, Point2us},
-    Solution,
+    Error, Solution,
 };
 use pathfinding::directed::bfs::bfs;
 
-pub fn solve(input: String) -> Solution<usize, usize> {
+pub fn solve(input: String) -> Result<Solution<usize, usize>, Error> {
     let (mut map, keys) = parse_input(input);
-    let p1 = solve_part1(&map, keys);
+    let p1 = solve_part1(&map, keys)?;
     transform_map(&mut map);
-    let p2 = solve_part2(&mut map, keys);
-    Solution::new(p1, p2)
+    let p2 = solve_part2(&mut map, keys)?;
+    Ok(Solution::new(p1, p2))
 } // 151.24s
 
-fn solve_part1(map: &[Vec<char>], all_keys: u32) -> usize {
+fn solve_part1(map: &[Vec<char>], all_keys: u32) -> Result<usize, Error> {
     let start_pos = get_entrances(map)[0];
     let start = Cell::new(start_pos, 0);
     let path = bfs(
@@ -45,11 +45,11 @@ fn solve_part1(map: &[Vec<char>], all_keys: u32) -> usize {
         },
         |Cell { keys, .. }| *keys == all_keys,
     )
-    .unwrap();
-    path.len() - 1
+    .ok_or_else(|| error!("No path found for part1"))?;
+    Ok(path.len() - 1)
 }
 
-fn solve_part2(map: &mut Vec<Vec<char>>, all_keys: u32) -> usize {
+fn solve_part2(map: &mut Vec<Vec<char>>, all_keys: u32) -> Result<usize, Error> {
     let start_poss = get_entrances(&map);
     let start = Cells::new(start_poss, 0, None);
     let path = bfs(
@@ -90,8 +90,8 @@ fn solve_part2(map: &mut Vec<Vec<char>>, all_keys: u32) -> usize {
         },
         |Cells { keys, .. }| *keys == all_keys,
     )
-    .unwrap();
-    path.len() - 1
+    .ok_or_else(|| error!("No path found for part2"))?;
+    Ok(path.len() - 1)
 }
 
 fn parse_input(input: String) -> (Vec<Vec<char>>, u32) {
@@ -185,23 +185,23 @@ mod tests {
     fn test18() {
         let input =
             "########################\n#f.D.E.e.C.b.A.@.a.B.c.#\n######################.#\n#d.....................#\n########################"
-            .to_string();
+            .to_owned();
         let (map, keys) = parse_input(input);
-        assert_eq!(solve_part1(&map, keys), 86);
+        assert_eq!(solve_part1(&map, keys).unwrap(), 86);
         let input =
             "########################\n#@..............ac.GI.b#\n###d#e#f################\n###A#B#C################\n###g#h#i################\n########################"
-            .to_string();
+            .to_owned();
         let (map, keys) = parse_input(input);
-        assert_eq!(solve_part1(&map, keys), 81);
+        assert_eq!(solve_part1(&map, keys).unwrap(), 81);
         let input =
             "#############\n#g#f.D#..h#l#\n#F###e#E###.#\n#dCba@#@BcIJ#\n#############\n#nK.L@#@G...#\n#M###N#H###.#\n#o#m..#i#jk.#\n#############"
-            .to_string();
+            .to_owned();
         let (mut map, keys) = parse_input(input);
-        assert_eq!(solve_part2(&mut map, keys), 72);
+        assert_eq!(solve_part2(&mut map, keys).unwrap(), 72);
     }
 
     #[test]
-    #[ignore] // test takes much time
+    //#[ignore] // test takes much time
     fn test18_actual() {
         crate::util::tests::test_full_problem(18, solve, 4420, 2128);
     }

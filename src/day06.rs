@@ -1,40 +1,51 @@
-use crate::Solution;
+use crate::{Error, Solution};
 
 use std::collections::{HashMap, HashSet, VecDeque};
 
 type Relations = HashMap<usize, Vec<usize>>;
 
-pub fn solve(input: String) -> Solution<usize, usize> {
-    let (ids, directed, undirected) = prepare_maps(input);
-    let p1 = solve_part1(&directed, *ids.get("COM").unwrap());
+pub fn solve(input: String) -> Result<Solution<usize, usize>, Error> {
+    let (ids, directed, undirected) = prepare_maps(input)?;
+    let p1 = solve_part1(
+        &directed,
+        *ids.get("COM")
+            .ok_or_else(|| error!("Could not find key 'COM' in ids"))?,
+    );
     let p2 = solve_part2(
         &undirected,
-        *ids.get("YOU").unwrap(),
-        *ids.get("SAN").unwrap(),
-    )
-    .unwrap();
-    Solution::new(p1, p2)
-}
+        *ids.get("YOU")
+            .ok_or_else(|| error!("Could not find key 'YOU' in ids"))?,
+        *ids.get("SAN")
+            .ok_or_else(|| error!("Could not find key 'SAN' in ids"))?,
+    )?;
+    Ok(Solution::new(p1, p2))
+} // 47.8ms
 
-fn prepare_maps(input: String) -> (HashMap<String, usize>, Relations, Relations) {
+fn prepare_maps(input: String) -> Result<(HashMap<String, usize>, Relations, Relations), Error> {
     let mut ids: HashMap<String, usize> = HashMap::new();
-    let mut directed: Relations = HashMap::new();
-    let mut undirected: Relations = HashMap::new();
+    let mut directed: Relations = Relations::new();
+    let mut undirected: Relations = Relations::new();
     let mut id = 0;
     for line in input.lines() {
         let mut line_iter = line.split(')');
-        let center = *ids
-            .entry(String::from(line_iter.next().unwrap()))
-            .or_insert_with(|| {
-                id += 1;
-                id
-            });
-        let orbiter = *ids
-            .entry(String::from(line_iter.next().unwrap()))
-            .or_insert_with(|| {
-                id += 1;
-                id
-            });
+        let center_name = String::from(
+            line_iter
+                .next()
+                .ok_or_else(|| error!("Could not find name of center"))?,
+        );
+        let center = *ids.entry(center_name).or_insert_with(|| {
+            id += 1;
+            id
+        });
+        let orbiter_name = String::from(
+            line_iter
+                .next()
+                .ok_or_else(|| error!("Could not find name of orbiter"))?,
+        );
+        let orbiter = *ids.entry(orbiter_name).or_insert_with(|| {
+            id += 1;
+            id
+        });
         directed
             .entry(center)
             .or_insert_with(Vec::new)
@@ -48,7 +59,7 @@ fn prepare_maps(input: String) -> (HashMap<String, usize>, Relations, Relations)
             .or_insert_with(Vec::new)
             .push(center);
     }
-    (ids, directed, undirected)
+    Ok((ids, directed, undirected))
 }
 
 fn solve_part1(map: &Relations, start: usize) -> usize {
@@ -77,7 +88,7 @@ fn solve_part1(map: &Relations, start: usize) -> usize {
     sum
 }
 
-fn solve_part2(map: &Relations, start: usize, end: usize) -> Option<usize> {
+fn solve_part2(map: &Relations, start: usize, end: usize) -> Result<usize, Error> {
     let mut depths = HashMap::new();
     let mut queue = VecDeque::new();
     let mut visited = HashSet::new();
@@ -92,7 +103,7 @@ fn solve_part2(map: &Relations, start: usize, end: usize) -> Option<usize> {
                 if !visited.contains(&orbiter) {
                     let depth = depths.get(center).unwrap() + 1;
                     if orbiter == end {
-                        return Some(depth - 2);
+                        return Ok(depth - 2);
                     }
                     visited.insert(orbiter);
                     depths.insert(orbiter, depth);
@@ -101,7 +112,7 @@ fn solve_part2(map: &Relations, start: usize, end: usize) -> Option<usize> {
             }
         }
     }
-    None
+    bail!("No path from 'YOU' to 'SAN' found");
 }
 
 #[cfg(test)]
@@ -110,12 +121,12 @@ mod tests {
 
     #[test]
     fn test06() {
-        let input = String::from("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L");
-        let (ids, map, _) = prepare_maps(input);
+        let input = "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L".to_owned();
+        let (ids, map, _) = prepare_maps(input).unwrap();
         assert_eq!(solve_part1(&map, *ids.get("COM").unwrap()), 42);
         let input =
-            String::from("COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN");
-        assert_eq!(solve(input), Solution::new(54, 4));
+            "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L\nK)YOU\nI)SAN".to_owned();
+        assert_eq!(solve(input).unwrap(), Solution::new(54, 4));
         crate::util::tests::test_full_problem(6, solve, 453028, 562);
     }
 }
