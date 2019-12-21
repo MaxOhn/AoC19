@@ -1,11 +1,10 @@
-use crate::{computer::Computer, Solution};
+use crate::{computer::Computer, Error, Solution};
 
-pub fn solve(input: String) -> Solution<usize, i64> {
-    let program: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
+pub fn solve(input: String) -> Result<Solution<usize, i64>, Error> {
     let mut p1 = 0;
     for x in 0..50 {
         for y in 0..50 {
-            if gets_pulled(&program, x, y) {
+            if gets_pulled(input.clone(), x, y)? {
                 p1 += 1;
             }
         }
@@ -13,19 +12,19 @@ pub fn solve(input: String) -> Solution<usize, i64> {
     let mut x = 3;
     let mut y = 4;
     loop {
-        while gets_pulled(&program, x, y) {
+        while gets_pulled(input.clone(), x, y)? {
             x += 1;
         }
-        if x > 99 && gets_pulled(&program, x - 100, y + 99) {
-            return Solution::new(p1, (x - 100) * 10_000 + y);
+        if x > 99 && gets_pulled(input.clone(), x - 100, y + 99)? {
+            return Ok(Solution::new(p1, (x - 100) * 10_000 + y));
         }
         y += 1;
     }
-} // 584.81ms
+} // 1.4s
 
-fn gets_pulled(program: &[i64], x: i64, y: i64) -> bool {
-    let mut drone = Computer::new(program.to_owned());
-    drone.insert(x).insert(y).run().pop() == 1
+fn gets_pulled(input: String, x: i64, y: i64) -> Result<bool, Error> {
+    let mut drone = Computer::new(input)?;
+    Ok(drone.insert(x)?.insert(y)?.run()?.pop()? == 1)
 }
 
 #[cfg(test)]

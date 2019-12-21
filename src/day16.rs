@@ -1,14 +1,24 @@
-use crate::Solution;
+use crate::{Error, Solution};
 
-pub fn solve(input: String) -> Solution<i32, i32> {
-    let signal = input
-        .chars()
-        .map(|c| c.to_digit(10).unwrap() as i32)
-        .collect::<Vec<_>>();
+pub fn solve(input: String) -> Result<Solution<i32, i32>, Error> {
+    let signal = parse_input(input)?;
     let p1 = solve_part1(signal.clone());
-    let p2 = solve_part2(signal);
-    Solution::new(p1, p2)
-} // 7.42s
+    let p2 = solve_part2(signal)?;
+    Ok(Solution::new(p1, p2))
+} // 6.07s
+
+fn parse_input(input: String) -> Result<Vec<i32>, Error> {
+    Ok(input
+        .chars()
+        .map(|c| {
+            c.to_digit(10)
+                .ok_or_else(|| error!("Can not parse {} to digit", c))
+        })
+        .collect::<Result<Vec<_>, Error>>()? // TODO: Nicer way?
+        .into_iter()
+        .map(|d| d as i32)
+        .collect::<Vec<_>>())
+}
 
 fn solve_part1(mut signal: Vec<i32>) -> i32 {
     let len = signal.len();
@@ -35,9 +45,15 @@ fn solve_part1(mut signal: Vec<i32>) -> i32 {
         .fold(0, |sum, next| 10 * sum + next)
 }
 
-fn solve_part2(mut signal: Vec<i32>) -> i32 {
+fn solve_part2(mut signal: Vec<i32>) -> Result<i32, Error> {
     let offset = signal[..7].iter().fold(0, |sum, &next| 10 * sum + next) as usize;
-    assert!(offset > signal.len() / 2);
+    if offset < signal.len() / 2 {
+        bail!(
+            "offset ({}) must be at least signal.len() / 2 ({}) for part2 to work",
+            offset,
+            signal.len() / 2
+        );
+    }
     let len = signal.len() * 10_000 - offset;
     signal = signal.into_iter().rev().cycle().take(len).collect();
     for _ in 0..100 {
@@ -49,11 +65,11 @@ fn solve_part2(mut signal: Vec<i32>) -> i32 {
             })
             .collect();
     }
-    signal
+    Ok(signal
         .into_iter()
         .rev()
         .take(8)
-        .fold(0, |sum, next| 10 * sum + next)
+        .fold(0, |sum, next| 10 * sum + next))
 }
 
 #[cfg(test)]
@@ -62,46 +78,18 @@ mod tests {
 
     #[test]
     fn test16() {
-        let inputs: Vec<(&str, i32, Box<dyn Fn(Vec<i32>) -> i32>)> = vec![
-            (
-                "80871224585914546619083218645595",
-                24176176,
-                Box::new(solve_part1),
-            ),
-            (
-                "19617804207202209144916044189917",
-                73745418,
-                Box::new(solve_part1),
-            ),
-            (
-                "69317163492948606335995924319873",
-                52432133,
-                Box::new(solve_part1),
-            ),
-            (
-                "03036732577212944063491565474664",
-                84462026,
-                Box::new(solve_part2),
-            ),
-            (
-                "02935109699940807407585447034323",
-                78725270,
-                Box::new(solve_part2),
-            ),
-            (
-                "03081770884921959731165446850517",
-                53553731,
-                Box::new(solve_part2),
-            ),
-        ];
-        for input in &inputs {
-            let signal = input
-                .0
-                .chars()
-                .map(|c| c.to_digit(10).unwrap() as i32)
-                .collect::<Vec<_>>();
-            assert_eq!(input.2(signal), input.1);
-        }
+        let signal = parse_input("80871224585914546619083218645595".to_owned()).unwrap();
+        assert_eq!(solve_part1(signal), 24_176_176);
+        let signal = parse_input("19617804207202209144916044189917".to_owned()).unwrap();
+        assert_eq!(solve_part1(signal), 73_745_418);
+        let signal = parse_input("69317163492948606335995924319873".to_owned()).unwrap();
+        assert_eq!(solve_part1(signal), 52_432_133);
+        let signal = parse_input("03036732577212944063491565474664".to_owned()).unwrap();
+        assert_eq!(solve_part2(signal).unwrap(), 84_462_026);
+        let signal = parse_input("02935109699940807407585447034323".to_owned()).unwrap();
+        assert_eq!(solve_part2(signal).unwrap(), 78_725_270);
+        let signal = parse_input("03081770884921959731165446850517".to_owned()).unwrap();
+        assert_eq!(solve_part2(signal).unwrap(), 53_553_731);
         crate::util::tests::test_full_problem(16, solve, 36627552, 79723033);
     }
 }

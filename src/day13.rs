@@ -1,19 +1,18 @@
 use crate::{
     computer::{Channel, Computer},
     util::{GridMap, Point2i},
-    Solution,
+    Error, Solution,
 };
 use std::collections::HashMap;
 use std::io::{self, BufRead};
 
-pub fn solve(input: String) -> Solution<usize, i64> {
-    let mut program: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
-    let mut computer = Computer::new(program.clone());
-    computer.set_output_channel(Channel::new(3000)).run();
+pub fn solve(mut input: String) -> Result<Solution<usize, i64>, Error> {
+    let mut computer = Computer::new(input.clone())?;
+    computer.set_output_channel(Channel::new(3000)).run()?;
     let mut grid = GridMap::new();
     while let Some(x) = computer.try_pop() {
-        let y = computer.pop();
-        let tile = computer.pop();
+        let y = computer.pop()?;
+        let tile = computer.pop()?;
         grid.insert(Point2i::new(x as i32, y as i32), tile);
     }
     let p1 = grid.iter().filter(|(_, v)| **v == 2).count();
@@ -23,8 +22,8 @@ pub fn solve(input: String) -> Solution<usize, i64> {
     mapping.insert(2, 'X');
     mapping.insert(3, '-');
     mapping.insert(4, '•');
-    program[0] = 2;
-    let mut computer = Computer::new(program);
+    input.replace_range(..1, "2");
+    let mut computer = Computer::new(input)?;
     let mut ready_to_play = false;
     let mut p2 = 0;
     let mut ball;
@@ -32,11 +31,11 @@ pub fn solve(input: String) -> Solution<usize, i64> {
     const MANUAL: bool = false; // false -> let AI play; true -> play yourself
     computer
         .set_output_channel(Channel::new(3000))
-        .insert(-1)
-        .run();
+        .insert(-1)?
+        .run()?;
     while let Some(x) = computer.try_pop() {
-        let y = computer.pop();
-        let tile = computer.pop();
+        let y = computer.pop()?;
+        let tile = computer.pop()?;
         if x == -1 && y == 0 {
             ready_to_play = true;
             p2 = p2.max(tile);
@@ -49,10 +48,10 @@ pub fn solve(input: String) -> Solution<usize, i64> {
                 if ready_to_play {
                     if MANUAL {
                         computer
-                            .insert(read_stdin(&grid.map_values(&mapping, Some(' '))))
-                            .run();
+                            .insert(read_stdin(&grid.map_values(&mapping, Some(' '))?)?)?
+                            .run()?;
                     } else {
-                        computer.insert((ball - paddle).min(1).max(-1)).run();
+                        computer.insert((ball - paddle).min(1).max(-1))?.run()?;
                     }
                 }
             }
@@ -62,18 +61,18 @@ pub fn solve(input: String) -> Solution<usize, i64> {
         println!("Score: {}", p2);
         println!("Game Over");
     }
-    Solution::new(p1, p2)
+    Ok(Solution::new(p1, p2))
 } // 250.96ms
 
-fn read_stdin(grid: &GridMap<char>) -> i64 {
+fn read_stdin(grid: &GridMap<char>) -> Result<i64, Error> {
     println!("{}", grid);
     println!("Next input:");
     let mut line = String::new();
     let stdin = io::stdin();
-    stdin.lock().read_line(&mut line).unwrap();
+    stdin.lock().read_line(&mut line)?;
     // 1: Left, 2: Stay, 3: Right
     match line.trim().parse::<i64>() {
-        Ok(val) if 0 < val && val < 4 => val - 2,
+        Ok(val) if 0 < val && val < 4 => Ok(val - 2),
         _ => read_stdin(grid),
     }
 }

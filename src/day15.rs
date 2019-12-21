@@ -1,14 +1,13 @@
 use crate::{
     computer::Computer,
     util::{Direction, GridMap, Point2i},
-    Solution,
+    Error, Solution,
 };
 
 use std::collections::HashSet;
 
-pub fn solve(input: String) -> Solution<i32, i32> {
-    let program: Vec<i64> = input.split(',').map(|n| n.parse().unwrap()).collect();
-    let mut computer = Computer::new(program);
+pub fn solve(input: String) -> Result<Solution<i32, i32>, Error> {
+    let mut computer = Computer::new(input)?;
     let mut curr_pos = Point2i::new(0, 0);
     let mut curr_dir = Direction::N;
     // 0: Wall; 1: Path; 2: Blocked; 3: Oxygenated
@@ -19,12 +18,12 @@ pub fn solve(input: String) -> Solution<i32, i32> {
     let p2;
     loop {
         match curr_dir {
-            Direction::N => computer.insert(1),
-            Direction::S => computer.insert(2),
-            Direction::W => computer.insert(3),
-            Direction::E => computer.insert(4),
+            Direction::N => computer.insert(1)?,
+            Direction::S => computer.insert(2)?,
+            Direction::W => computer.insert(3)?,
+            Direction::E => computer.insert(4)?,
         };
-        match computer.run().pop() {
+        match computer.run()?.pop()? {
             0 => {
                 grid.insert(curr_pos + curr_dir.shift(), 0);
             }
@@ -76,8 +75,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
             let mut visited = HashSet::new();
             visited.insert(pos);
             let mut backtrack = vec![(pos, 0)];
-            while !backtrack.is_empty() {
-                let (pos, dist) = backtrack.pop().unwrap();
+            while let Some((pos, dist)) = backtrack.pop() {
                 for dir in Direction::iter() {
                     let next_pos = pos + dir.shift();
                     if grid[&next_pos] != 0 && !visited.contains(&next_pos) {
@@ -97,8 +95,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
             visited.insert(oxy_pos);
             let mut backtrack = vec![(oxy_pos, 0)];
             let mut minutes = 0;
-            while !backtrack.is_empty() {
-                let (pos, m) = backtrack.pop().unwrap();
+            while let Some((pos, m)) = backtrack.pop() {
                 minutes = minutes.max(m);
                 grid.insert(pos, 3);
                 for dir in Direction::iter() {
@@ -113,7 +110,7 @@ pub fn solve(input: String) -> Solution<i32, i32> {
             break;
         }
     }
-    Solution::new(p1, p2)
+    Ok(Solution::new(p1, p2))
 } // 59.31ms
 
 #[cfg(test)]

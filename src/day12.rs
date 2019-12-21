@@ -1,28 +1,33 @@
 use crate::{
     util::{lcm, Point3i},
-    Solution,
+    Error, Solution,
 };
 
 use num::Signed;
 
-pub fn solve(input: String) -> Solution<i32, i64> {
-    let mut moons = get_moons(input);
+pub fn solve(input: String) -> Result<Solution<i32, i64>, Error> {
+    let mut moons = get_moons(input)?;
     let p1 = solve_part1(1000, &mut moons.to_vec());
     let p2 = solve_part2(&mut moons);
-    Solution::new(p1, p2)
+    Ok(Solution::new(p1, p2))
 } // 231.14ms
 
-fn get_moons(input: String) -> Vec<Moon> {
-    input
-        .lines()
-        .map(|line| {
-            line[1..line.len() - 1]
-                .split(", ")
-                .map(|split| split.split('=').last().unwrap().parse::<i32>().unwrap())
-                .collect::<Vec<i32>>()
-        })
-        .map(|vec| Moon::new(vec[0], vec[1], vec[2]))
-        .collect::<Vec<_>>()
+fn get_moons(input: String) -> Result<Vec<Moon>, Error> {
+    let mut moons = Vec::with_capacity(4);
+    for line in input.lines() {
+        let mut moon = Vec::with_capacity(3);
+        let splits = line[1..line.len() - 1].split(", ");
+        for split in splits {
+            let value = split
+                .split('=')
+                .last()
+                .ok_or_else(|| error!("Missing characters after '='"))?
+                .parse::<i32>()?;
+            moon.push(value);
+        }
+        moons.push(Moon::new(&moon));
+    }
+    Ok(moons)
 }
 
 fn solve_part1(steps: usize, moons: &mut [Moon]) -> i32 {
@@ -72,9 +77,9 @@ struct Moon {
 }
 
 impl Moon {
-    fn new(x: i32, y: i32, z: i32) -> Self {
+    fn new(pos: &[i32]) -> Self {
         Moon {
-            pos: Point3i::new(x, y, z),
+            pos: Point3i::new(pos[0], pos[1], pos[2]),
             vel: Point3i::new(0, 0, 0),
         }
     }
@@ -90,24 +95,22 @@ mod tests {
 
     #[test]
     fn test12() {
-        let input = String::from(
-            "<x=-1, y=0, z=2>\n<x=2, y=-10, z=-7>\n<x=4, y=-8, z=8>\n<x=3, y=5, z=-1>",
-        );
-        let mut moons = get_moons(input);
+        let input =
+            "<x=-1, y=0, z=2>\n<x=2, y=-10, z=-7>\n<x=4, y=-8, z=8>\n<x=3, y=5, z=-1>".to_owned();
+        let mut moons = get_moons(input).unwrap();
         assert_eq!(
             solve_part1(10, &mut moons.iter().cloned().collect::<Vec<_>>()),
             179
         );
         assert_eq!(solve_part2(&mut moons), 2772);
-        let input = String::from(
-            "<x=-8, y=-10, z=0>\n<x=5, y=5, z=10>\n<x=2, y=-7, z=3>\n<x=9, y=-8, z=-3>",
-        );
-        let mut moons = get_moons(input);
+        let input =
+            "<x=-8, y=-10, z=0>\n<x=5, y=5, z=10>\n<x=2, y=-7, z=3>\n<x=9, y=-8, z=-3>".to_owned();
+        let mut moons = get_moons(input).unwrap();
         assert_eq!(
             solve_part1(100, &mut moons.iter().cloned().collect::<Vec<_>>()),
             1940
         );
-        assert_eq!(solve_part2(&mut moons), 4686774924i64);
-        crate::util::tests::test_full_problem(12, solve, 9127, 353620566035124i64);
+        assert_eq!(solve_part2(&mut moons), 4_686_774_924i64);
+        crate::util::tests::test_full_problem(12, solve, 9127, 353_620_566_035_124i64);
     }
 }
