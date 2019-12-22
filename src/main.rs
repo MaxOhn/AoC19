@@ -16,7 +16,7 @@ fn main() {
 
 fn run() -> Result<(), Error> {
     let days = vec![
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
     ];
 
     let day: i32 = if let Some(arg) = env::args().nth(1) {
@@ -49,6 +49,7 @@ fn run() -> Result<(), Error> {
         19 => day19::solve(input)?.to_string(),
         20 => day20::solve(input)?.to_string(),
         21 => day21::solve(input)?.to_string(),
+        22 => day22::solve(input)?.to_string(),
         d if 0 < d && d < 26 => bail!("Day {} not yet implemented", d),
         _ => bail!("Invalid day"),
     };

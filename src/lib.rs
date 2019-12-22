@@ -25,6 +25,7 @@ pub mod day18;
 pub mod day19;
 pub mod day20;
 pub mod day21;
+pub mod day22;
 
 pub use self::error::Error;
 pub use self::solution::Solution;
@@ -168,6 +169,22 @@ pub mod util {
         T: Num + Copy,
     {
         a * b / gcd(a, b)
+    }
+
+    /// Calculate (b^p)%m
+    /// # Examples
+    /// ```
+    /// use aoc19::util::mod_pow;
+    ///
+    /// let n = mod_pow(2, 3, 5);
+    /// assert_eq!(n, 3);
+    /// ```
+    pub fn mod_pow(b: i64, p: i64, m: i64) -> i64 {
+        match p {
+            0 => 1,
+            e if e % 2 == 0 => mod_pow((b * b) % m, e / 2, m),
+            _ => (b * mod_pow(b, p - 1, m)) % m,
+        }
     }
 
     /// Store a grid in a `HashMap<Point2i, T>`.
@@ -359,7 +376,7 @@ pub mod util {
         /// # use aoc19::Error;
         /// use std::collections::HashMap;
         /// use aoc19::util::{Point2i, GridMap};
-        /// 
+        ///
         /// # fn main() -> Result<(), Error> {
         /// let mut mapping = HashMap::new();
         /// mapping.insert(0, 'x');
