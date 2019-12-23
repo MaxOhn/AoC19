@@ -18,12 +18,16 @@ pub fn solve(input: String) -> Result<Solution<i32, i32>, Error> {
     let p2;
     loop {
         match curr_dir {
-            Direction::N => computer.insert(1)?,
-            Direction::S => computer.insert(2)?,
-            Direction::W => computer.insert(3)?,
-            Direction::E => computer.insert(4)?,
+            Direction::N => computer.insert(1),
+            Direction::S => computer.insert(2),
+            Direction::W => computer.insert(3),
+            Direction::E => computer.insert(4),
         };
-        match computer.run()?.pop()? {
+        match computer
+            .run()?
+            .pop()
+            .ok_or_else(|| error!("Expected output for terrain status, none found"))?
+        {
             0 => {
                 grid.insert(curr_pos + curr_dir.shift(), 0);
             }

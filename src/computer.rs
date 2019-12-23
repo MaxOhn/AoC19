@@ -1,15 +1,14 @@
 use crate::Error;
-use crossbeam::channel::{self, Receiver, RecvTimeoutError, SendTimeoutError, Sender};
-use std::time::Duration;
+use std::collections::VecDeque;
 
 pub struct Computer {
     memory: Vec<i64>,
     pc: usize,
     rb: i32,
-    input: Channel,
-    output: Channel,
+    input: VecDeque<i64>,
+    output: VecDeque<i64>,
     state: State,
-    multithread: bool,
+    halt_on_output: bool,
 }
 
 impl Computer {
@@ -22,10 +21,10 @@ impl Computer {
             memory,
             pc: 0,
             rb: 0,
-            input: Channel::default(),
-            output: Channel::default(),
+            input: VecDeque::new(),
+            output: VecDeque::new(),
             state: State::Ready,
-            multithread: false,
+            halt_on_output: false,
         })
     }
 
@@ -46,16 +45,19 @@ impl Computer {
             match op.opcode {
                 1 => self.memory[op.w] = op.v1 + op.v2,
                 2 => self.memory[op.w] = op.v1 * op.v2,
-                3 => {
-                    if self.multithread || !self.input.is_empty() {
-                        let input = self.input.pop()?;
-                        self.memory[op.w] = input;
-                    } else {
+                3 => match self.input.pop_front() {
+                    Some(input) => self.memory[op.w] = input,
+                    None => {
                         self.state = State::Wait;
                         return Ok(self);
                     }
+                },
+                4 => {
+                    self.output.push_back(op.v1);
+                    if self.halt_on_output {
+                        return Ok(self);
+                    }
                 }
-                4 => self.output.push(op.v1)?,
                 5 => {
                     op.pc = if op.v1 != 0 {
                         op.v2 as usize
@@ -80,38 +82,21 @@ impl Computer {
         Ok(self)
     }
 
-    #[allow(unused)]
-    pub fn set_input_channel(&mut self, input: Channel) -> &mut Self {
-        self.input = input;
+    pub fn halt_on_output(&mut self) -> &mut Self {
+        self.halt_on_output = !self.halt_on_output;
         self
     }
 
-    #[allow(unused)]
-    pub fn set_output_channel(&mut self, output: Channel) -> &mut Self {
-        self.output = output;
+    pub fn pop(&mut self) -> Option<i64> {
+        self.output.pop_front()
+    }
+
+    pub fn insert(&mut self, input: i64) -> &mut Self {
+        self.input.push_back(input);
         self
     }
 
-    #[allow(unused)]
-    pub fn set_multithread(&mut self) -> &mut Self {
-        self.multithread = true;
-        self
-    }
-
-    pub fn pop(&mut self) -> Result<i64, Error> {
-        self.output.pop()
-    }
-
-    pub fn try_pop(&mut self) -> Option<i64> {
-        self.output.try_pop()
-    }
-
-    pub fn insert(&mut self, input: i64) -> Result<&mut Self, Error> {
-        self.input.push(input)?;
-        Ok(self)
-    }
-
-    pub fn output_iter<'a>(&'a mut self) -> impl Iterator<Item = i64> + 'a {
+    pub fn output_iter<'a>(&'a mut self) -> impl Iterator<Item = &i64> + 'a {
         self.output.iter()
     }
 }
@@ -121,62 +106,6 @@ enum State {
     Ready,
     Done,
     Wait,
-}
-
-#[derive(Clone, Debug)]
-pub struct Channel {
-    sender: Sender<i64>,
-    receiver: Receiver<i64>,
-}
-
-impl Default for Channel {
-    fn default() -> Self {
-        Channel::new(32)
-    }
-}
-
-impl Channel {
-    pub fn new(size: usize) -> Self {
-        let (sender, receiver) = channel::bounded(size);
-        Channel { sender, receiver }
-    }
-
-    fn push(&mut self, input: i64) -> Result<(), Error> {
-        if let Err(e) = self.sender.send_timeout(input, Duration::from_secs(2)) {
-            match e {
-                SendTimeoutError::Timeout(_) => {
-                    bail!("Timed out while trying to push into channel")
-                }
-                _ => unreachable!(),
-            }
-        }
-        Ok(())
-    }
-
-    fn try_pop(&mut self) -> Option<i64> {
-        match self.receiver.try_recv() {
-            Ok(output) => Some(output),
-            Err(_) => None,
-        }
-    }
-
-    fn pop(&mut self) -> Result<i64, Error> {
-        match self.receiver.recv_timeout(Duration::from_secs(2)) {
-            Ok(output) => Ok(output),
-            Err(e) => match e {
-                RecvTimeoutError::Timeout => bail!("Timed out while waiting for a result"),
-                _ => unreachable!(),
-            },
-        }
-    }
-
-    fn iter<'a>(&'a mut self) -> impl Iterator<Item = i64> + 'a {
-        self.receiver.try_iter()
-    }
-
-    fn is_empty(&self) -> bool {
-        self.receiver.is_empty()
-    }
 }
 
 struct Operation {

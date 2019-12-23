@@ -24,7 +24,13 @@ pub fn solve(input: String) -> Result<Solution<usize, i64>, Error> {
 
 fn gets_pulled(input: String, x: i64, y: i64) -> Result<bool, Error> {
     let mut drone = Computer::new(input)?;
-    Ok(drone.insert(x)?.insert(y)?.run()?.pop()? == 1)
+    Ok(drone
+        .insert(x)
+        .insert(y)
+        .run()?
+        .pop()
+        .ok_or_else(|| error!("Expected output for beam feedback, none found"))?
+        == 1)
 }
 
 #[cfg(test)]

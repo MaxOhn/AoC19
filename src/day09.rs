@@ -12,7 +12,7 @@ fn solve_with_input(input: String, computer_input: Option<i64>) -> Result<String
     let mut computer = Computer::new(input)?;
     computer.run()?;
     if let Some(input) = computer_input {
-        computer.insert(input)?.run()?;
+        computer.insert(input).run()?;
     }
     let result = computer
         .output_iter()

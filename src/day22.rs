@@ -39,7 +39,7 @@ pub fn solve(input: String) -> Result<Solution<usize, i32>, Error> {
     }
     const _LEN: i64 = 119_315_717_514_047;
     const _TIMES: i64 = 101_741_582_076_661;
-    
+
     Ok(Solution::new(p1, 0))
 }
 
@@ -67,7 +67,7 @@ impl Step {
                 let size = deck.len();
                 let mut new_deck = vec![0; size];
                 let mut idx_n = 0;
-                for card in deck.into_iter() {
+                for card in deck.iter() {
                     new_deck[idx_n] = *card;
                     idx_n = (idx_n + i) % size;
                 }
@@ -81,7 +81,7 @@ impl Step {
                 };
                 #[allow(mutable_borrow_reservation_conflict)]
                 deck.clone_from_slice(
-                    &back.into_iter().chain(front).cloned().collect::<Vec<_>>()[..],
+                    &back.iter().chain(front).cloned().collect::<Vec<_>>()[..],
                 );
             }
         }

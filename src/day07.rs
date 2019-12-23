@@ -15,14 +15,16 @@ fn solve_part1(input: String) -> Result<i64, Error> {
             .iter()
             .map(|&phase| {
                 let mut computer = Computer::new(input.clone())?;
-                computer.insert(phase)?;
+                computer.insert(phase);
                 Ok(computer)
             })
             .collect::<Result<Vec<_>, Error>>()?;
         let mut signal = 0;
         for amplifier in &mut amplifiers {
-            amplifier.insert(signal)?.run()?;
-            signal = amplifier.pop()?;
+            amplifier.insert(signal).run()?;
+            signal = amplifier
+                .pop()
+                .ok_or_else(|| error!("Expected output from ampifier, none found"))?;
         }
         max_signal = max_signal.max(signal);
     }
@@ -36,15 +38,15 @@ fn solve_part2(input: String) -> Result<i64, Error> {
             .iter()
             .map(|&phase| {
                 let mut computer = Computer::new(input.clone())?;
-                computer.insert(phase)?;
+                computer.insert(phase);
                 Ok(computer)
             })
             .collect::<Result<Vec<_>, Error>>()?;
         let mut idx = 0;
         let mut signal = 0;
         loop {
-            amplifiers[idx].insert(signal)?.run()?;
-            match amplifiers[idx].try_pop() {
+            amplifiers[idx].insert(signal).run()?;
+            match amplifiers[idx].pop() {
                 Some(output) => signal = output,
                 None => break,
             }

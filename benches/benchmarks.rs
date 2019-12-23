@@ -114,6 +114,11 @@ fn target_22(c: &mut Criterion) {
     c.bench_function("day22", |b| b.iter(|| day22::solve(String::from(&input))));
 }
 
+fn target_23(c: &mut Criterion) {
+    let input = fs::read_to_string("inputs/day23.txt").unwrap();
+    c.bench_function("day23", |b| b.iter(|| day23::solve(String::from(&input))));
+}
+
 criterion_group! {
     name = group;
     config = Criterion::default().warm_up_time(Duration::from_secs(5));
@@ -121,7 +126,7 @@ criterion_group! {
                 target_06, target_07, target_08, target_09, target_10,
                 target_11, target_12, target_13, target_14, target_15,
                 target_16, target_17, target_18, target_19, target_20,
-                target_21, target_22,
+                target_21, target_22, target_23,
 }
 
 criterion_main!(group);

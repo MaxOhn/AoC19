@@ -1,5 +1,5 @@
 use crate::{
-    computer::{Channel, Computer},
+    computer::Computer,
     util::{GridMap, Point2i},
     Error, Solution,
 };
@@ -8,11 +8,15 @@ use std::io::{self, BufRead};
 
 pub fn solve(mut input: String) -> Result<Solution<usize, i64>, Error> {
     let mut computer = Computer::new(input.clone())?;
-    computer.set_output_channel(Channel::new(3000)).run()?;
+    computer.run()?;
     let mut grid = GridMap::new();
-    while let Some(x) = computer.try_pop() {
-        let y = computer.pop()?;
-        let tile = computer.pop()?;
+    while let Some(x) = computer.pop() {
+        let y = computer
+            .pop()
+            .ok_or_else(|| error!("Expected output for y, none found"))?;
+        let tile = computer
+            .pop()
+            .ok_or_else(|| error!("Expected output for tile, none found"))?;
         grid.insert(Point2i::new(x as i32, y as i32), tile);
     }
     let p1 = grid.iter().filter(|(_, v)| **v == 2).count();
@@ -29,13 +33,14 @@ pub fn solve(mut input: String) -> Result<Solution<usize, i64>, Error> {
     let mut ball;
     let mut paddle = 0;
     const MANUAL: bool = false; // false -> let AI play; true -> play yourself
-    computer
-        .set_output_channel(Channel::new(3000))
-        .insert(-1)?
-        .run()?;
-    while let Some(x) = computer.try_pop() {
-        let y = computer.pop()?;
-        let tile = computer.pop()?;
+    computer.insert(-1).run()?;
+    while let Some(x) = computer.pop() {
+        let y = computer
+            .pop()
+            .ok_or_else(|| error!("Expected output for y, none found"))?;
+        let tile = computer
+            .pop()
+            .ok_or_else(|| error!("Expected output for tile, none found"))?;
         if x == -1 && y == 0 {
             ready_to_play = true;
             p2 = p2.max(tile);
@@ -48,10 +53,10 @@ pub fn solve(mut input: String) -> Result<Solution<usize, i64>, Error> {
                 if ready_to_play {
                     if MANUAL {
                         computer
-                            .insert(read_stdin(&grid.map_values(&mapping, Some(' '))?)?)?
+                            .insert(read_stdin(&grid.map_values(&mapping, Some(' '))?)?)
                             .run()?;
                     } else {
-                        computer.insert((ball - paddle).min(1).max(-1))?.run()?;
+                        computer.insert((ball - paddle).min(1).max(-1)).run()?;
                     }
                 }
             }

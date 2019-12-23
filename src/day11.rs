@@ -30,12 +30,15 @@ fn run(start: i64, input: String, grid: &mut GridMap<i64>) -> Result<(), Error> 
     grid.insert(pos, start);
     let mut direction = Direction::N;
     loop {
-        brain.insert(*grid.entry(pos).or_insert(0))?.run()?;
-        match brain.try_pop() {
+        brain.insert(*grid.entry(pos).or_insert(0)).run()?;
+        match brain.pop() {
             Some(output) => grid.insert(pos, output),
             None => break,
         };
-        direction = match brain.pop()? {
+        direction = match brain
+            .pop()
+            .ok_or_else(|| error!("Expected output for direction, none found"))?
+        {
             0 => direction.to_left(),
             1 => direction.to_right(),
             other => bail!("Found neither 0 nor 1 for directions, but {}", other),
