@@ -8,7 +8,6 @@ pub struct Computer {
     input: VecDeque<i64>,
     output: VecDeque<i64>,
     state: State,
-    halt_on_output: bool,
 }
 
 impl Computer {
@@ -24,7 +23,6 @@ impl Computer {
             input: VecDeque::new(),
             output: VecDeque::new(),
             state: State::Ready,
-            halt_on_output: false,
         })
     }
 
@@ -41,7 +39,12 @@ impl Computer {
             self.state = State::Done;
             return Ok(self);
         }
-        while let Some(mut op) = Operation::new(&mut self.memory, self.pc, self.rb)? {
+        while self.step()? == State::Ready {}
+        Ok(self)
+    }
+
+    pub fn step(&mut self) -> Result<State, Error> {
+        if let Some(mut op) = Operation::new(&mut self.memory, self.pc, self.rb)? {
             match op.opcode {
                 1 => self.memory[op.w] = op.v1 + op.v2,
                 2 => self.memory[op.w] = op.v1 * op.v2,
@@ -49,15 +52,10 @@ impl Computer {
                     Some(input) => self.memory[op.w] = input,
                     None => {
                         self.state = State::Wait;
-                        return Ok(self);
+                        return Ok(State::Wait);
                     }
                 },
-                4 => {
-                    self.output.push_back(op.v1);
-                    if self.halt_on_output {
-                        return Ok(self);
-                    }
-                }
+                4 => self.output.push_back(op.v1),
                 5 => {
                     op.pc = if op.v1 != 0 {
                         op.v2 as usize
@@ -78,13 +76,10 @@ impl Computer {
                 _ => bail!("Can't process opcode {}", op.opcode),
             }
             self.pc = op.pc;
+            Ok(State::Ready)
+        } else {
+            Ok(State::Done)
         }
-        Ok(self)
-    }
-
-    pub fn halt_on_output(&mut self) -> &mut Self {
-        self.halt_on_output = !self.halt_on_output;
-        self
     }
 
     pub fn pop(&mut self) -> Option<i64> {
@@ -101,8 +96,8 @@ impl Computer {
     }
 }
 
-#[derive(Eq, PartialEq)]
-enum State {
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum State {
     Ready,
     Done,
     Wait,

@@ -80,9 +80,7 @@ impl Step {
                     deck.split_at(deck.len() - -c as usize)
                 };
                 #[allow(mutable_borrow_reservation_conflict)]
-                deck.clone_from_slice(
-                    &back.iter().chain(front).cloned().collect::<Vec<_>>()[..],
-                );
+                deck.clone_from_slice(&back.iter().chain(front).cloned().collect::<Vec<_>>()[..]);
             }
         }
     }
