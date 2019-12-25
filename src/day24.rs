@@ -12,7 +12,7 @@ pub fn solve(input: String) -> Result<Solution<usize, usize>, Error> {
     }
     let p2 = layers.count_bugs();
     Ok(Solution::new(p1, p2))
-} // 581.47ms
+} // 591.25ms
 
 struct Layers {
     layers: Vec<Vec<char>>,
