@@ -14,6 +14,7 @@ pub fn solve(input: String) -> Result<Solution<i64, i64>, Error> {
         .run()?
         .pop()
         .ok_or_else(|| error!("No output produced for part 2"))?;
+    //println!("Memory:\n{:?}", computer.memory);
     Ok(Solution::new(*p1, p2))
 } // 0.77ms
 

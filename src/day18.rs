@@ -5,6 +5,17 @@ use crate::{
 use pathfinding::directed::bfs::bfs;
 
 pub fn solve(input: String) -> Result<Solution<usize, usize>, Error> {
+    // let input = "\
+    // #################\n\
+    // #i.G..c...e..H.p#\n\
+    // ########.########\n\
+    // #j.A..b...f..D.o#\n\
+    // ########@########\n\
+    // #k.E..a...g..B.n#\n\
+    // ########.########\n\
+    // #l.F..d...h..C.m#\n\
+    // #################"
+    //     .to_owned();
     let (mut map, keys) = parse_input(input);
     let p1 = solve_part1(&map, keys)?;
     transform_map(&mut map);
@@ -17,31 +28,34 @@ fn solve_part1(map: &[Vec<char>], all_keys: u32) -> Result<usize, Error> {
     let start = Cell::new(start_pos, 0);
     let path = bfs(
         &start,
-        |Cell { pos, keys }| {
-            get_neighbors(pos)
-                .iter()
-                .filter_map(|neighbor| match map[neighbor.y][neighbor.x] {
-                    '#' => None,
-                    '.' | '@' => Some(Cell::new(*neighbor, *keys)),
+        |&cell| {
+            let pos = cell.pos;
+            let keys = cell.keys;
+            get_neighbors(&pos) // iterate over neighbors
+                .into_iter()
+                .filter_map(move |neighbor| match map[neighbor.y][neighbor.x] {
+                    '#' => None,                                  // wall, ignore neighbor
+                    '.' | '@' => Some(Cell::new(neighbor, keys)), // safe to move there without key progress, push neighbor into queue
                     key if key.is_ascii_lowercase() => {
+                        // got a key, add to keys bitmask
                         let pos = key as u8 - 97;
                         if (keys >> pos) & 1 == 1 {
-                            Some(Cell::new(*neighbor, *keys))
+                            Some(Cell::new(neighbor, keys)) // key was already present, push neighbor into queue with the same keys
                         } else {
-                            Some(Cell::new(*neighbor, keys + (1 << pos)))
+                            Some(Cell::new(neighbor, keys + (1 << pos))) // key is new, push neighbor into queue with updated keys
                         }
                     }
                     door if door.is_ascii_uppercase() => {
+                        // got a door, check if its key was collected
                         let pos = door as u8 - 65;
                         if (keys >> pos) & 1 == 1 {
-                            Some(Cell::new(*neighbor, *keys))
+                            Some(Cell::new(neighbor, keys)) // key was collected, push neighbor into queue
                         } else {
-                            None
+                            None // havent found key yet, ignore neighbor
                         }
                     }
                     _ => unreachable!(),
                 })
-                .collect::<Vec<_>>()
         },
         |Cell { keys, .. }| *keys == all_keys,
     )

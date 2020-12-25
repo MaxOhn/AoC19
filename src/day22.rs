@@ -1,89 +1,240 @@
 use crate::{Error, Solution};
+use std::str::FromStr;
 
-pub fn solve(input: String) -> Result<Solution<usize, i32>, Error> {
-    /*
-    let __input =
-        "deal into new stack\ncut -2\ndeal with increment 7\ncut 8\ncut -4\ndeal with increment 7\ncut 3\ndeal with increment 9\ndeal with increment 3\ncut -1"
-        .to_owned();
-    let input = __input;
-    */
-    let shuffle = input
-        .lines()
-        .map(|line| {
-            let mut split = line.split_whitespace();
-            let first_word = split
-                .next()
-                .ok_or_else(|| error!("Can not read empty line"))?;
-            let second_word = split
-                .next()
-                .ok_or_else(|| error!("Could not read second word of line '{}'", line))?;
-            if first_word == "deal" {
-                if second_word == "with" {
-                    let incr: usize = split
-                        .nth(1)
-                        .ok_or_else(|| error!("Could not read increment value of line '{}'", line))?
-                        .parse()?;
-                    Ok(Step::Increment(incr))
-                } else {
-                    Ok(Step::Reverse)
-                }
-            } else {
-                let cut: i32 = second_word.parse()?;
-                Ok(Step::Cut(cut))
-            }
-        })
-        .collect::<Result<Vec<Step>, Error>>()?;
-    let mut p1 = 2019;
-    for step in shuffle.iter() {
-        p1 = step.predict_next(p1, 10_007);
-    }
-    const _LEN: i64 = 119_315_717_514_047;
-    const _TIMES: i64 = 101_741_582_076_661;
+pub fn solve(input: String) -> Result<Solution<usize, usize>, Error> {
+    let p1 = part1(input.as_str());
+    let p2 = part2(input.as_str());
 
-    Ok(Solution::new(p1, 0))
+    Ok(Solution::new(p1, p2))
 }
 
-#[derive(Debug)]
+fn part1(input: &str) -> usize {
+    let mut shuffle: Vec<_> = input
+        .lines()
+        .map(Step::from_str)
+        .map(Result::unwrap)
+        .collect();
+
+    const LEN: usize = 10_007;
+
+    minimize_shuffle(&mut shuffle, LEN);
+
+    let mut p1 = 2019;
+
+    for step in shuffle {
+        p1 = step.predict_next(p1, LEN);
+    }
+
+    p1
+}
+
+fn part2(input: &str) -> usize {
+    let len = 119_315_717_514_047;
+    let mut iters: usize = 101_741_582_076_661;
+
+    let mut shuffle: Vec<_> = input
+        .lines()
+        .map(Step::from_str)
+        .map(Result::unwrap)
+        .collect();
+
+    minimize_shuffle(&mut shuffle, len);
+
+    let mut final_shuffle = Vec::with_capacity(6);
+
+    while iters > 0 {
+        let mut pow = if iters.is_power_of_two() {
+            iters
+        } else {
+            iters.next_power_of_two() / 2
+        };
+
+        iters -= pow;
+
+        let mut curr = shuffle.clone();
+
+        while pow > 1 {
+            curr.append(&mut curr.clone());
+            minimize_shuffle(&mut curr, len);
+            pow /= 2;
+        }
+
+        final_shuffle.append(&mut curr);
+        minimize_shuffle(&mut final_shuffle, len);
+    }
+
+    let mut p2 = 2020;
+
+    for &step in final_shuffle.iter().rev() {
+        p2 = step.predict_prev(p2, len);
+    }
+
+    p2
+}
+
+fn minimize_shuffle(shuffle: &mut Vec<Step>, len: usize) {
+    let mut changed = true;
+
+    while changed {
+        changed = false;
+        let mut i = 0;
+
+        while i < shuffle.len() - 1 {
+            match (shuffle[i], shuffle[i + 1]) {
+                (Step::NewStack, Step::NewStack) => {
+                    shuffle.remove(i + 1);
+                    shuffle.remove(i);
+                    changed = true;
+                    i = i.saturating_sub(1);
+                }
+                (Step::Cut(a), Step::Cut(b)) => {
+                    shuffle.remove(i + 1);
+                    shuffle[i] = Step::Cut((a + b) % len as isize);
+                    changed = true;
+                }
+                (Step::Increment(a), Step::Increment(b)) => {
+                    shuffle.remove(i + 1);
+                    shuffle[i] = Step::Increment(usize::mul_mod(a, b, len));
+                    changed = true;
+                }
+                (Step::Cut(a), Step::Increment(b)) => {
+                    shuffle.swap(i, i + 1);
+                    shuffle[i + 1] = Step::Cut(isize::mul_mod(a, b as isize, len as isize));
+                    changed = true;
+                    i += 1;
+                }
+                (Step::NewStack, Step::Increment(a)) => {
+                    shuffle.swap(i, i + 1);
+                    shuffle[i + 1] = Step::Cut((1 - a as isize) % len as isize);
+                    shuffle.insert(i + 2, Step::NewStack);
+                    changed = true;
+                    i += 2;
+                }
+                (Step::NewStack, Step::Cut(a)) => {
+                    shuffle.swap(i, i + 1);
+                    shuffle[i] = Step::Cut((len as isize - a) % len as isize);
+                    changed = true;
+                    i += 1;
+                }
+                _ => i += 1,
+            }
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
 enum Step {
-    Reverse,
+    NewStack,
+    Cut(isize),
     Increment(usize),
-    Cut(i32),
+}
+
+impl FromStr for Step {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut split = s.split(' ');
+
+        let technique = match (split.next().unwrap(), split.next().unwrap()) {
+            ("cut", n) => Self::Cut(n.parse().unwrap()),
+            ("deal", "into") => Self::NewStack,
+            ("deal", "with") => Self::Increment(split.nth(1).unwrap().parse().unwrap()),
+            _ => return Err(()),
+        };
+
+        Ok(technique)
+    }
 }
 
 impl Step {
-    fn predict_next(&self, pos: usize, len: usize) -> usize {
+    // No longer required, replaced by predict_next and predict_prev
+    fn _apply(self, cards: &mut [usize], buf: &mut [usize]) {
         match self {
-            Step::Reverse => len - pos - 1,
-            Step::Increment(i) => (pos * i) % len,
-            Step::Cut(c) => ((pos as i32 - c + len as i32) as usize) % len,
+            Self::NewStack => cards.reverse(),
+            Self::Cut(n) => {
+                if n < 0 {
+                    let mid = -n as usize % cards.len();
+                    cards.rotate_right(mid);
+                } else {
+                    let mid = n as usize % cards.len();
+                    cards.rotate_left(mid as usize);
+                }
+            }
+            Self::Increment(n) => {
+                for i in 0..cards.len() {
+                    buf[(n * i) % cards.len()] = cards[i];
+                }
+                cards.swap_with_slice(buf);
+            }
         }
     }
 
-    #[allow(unused)]
-    fn apply(&self, deck: &mut [usize]) {
+    fn predict_next(self, pos: usize, len: usize) -> usize {
         match self {
-            Step::Reverse => deck.reverse(),
-            Step::Increment(i) => {
-                let size = deck.len();
-                let mut new_deck = vec![0; size];
-                let mut idx_n = 0;
-                for card in deck.iter() {
-                    new_deck[idx_n] = *card;
-                    idx_n = (idx_n + i) % size;
-                }
-                deck.clone_from_slice(&new_deck);
-            }
-            Step::Cut(c) => {
-                let (front, back) = if *c > 0 {
-                    deck.split_at(*c as usize)
-                } else {
-                    deck.split_at(deck.len() - -c as usize)
-                };
-                #[allow(mutable_borrow_reservation_conflict)]
-                deck.clone_from_slice(&back.iter().chain(front).cloned().collect::<Vec<_>>()[..]);
-            }
+            Self::NewStack => len - pos - 1,
+            Self::Increment(n) => (pos * n) % len,
+            Self::Cut(n) => ((pos as isize - n + len as isize) as usize) % len,
         }
     }
+
+    fn predict_prev(self, pos: usize, len: usize) -> usize {
+        match self {
+            Self::NewStack => len - pos - 1,
+            Self::Increment(n) => linear_congruence(n, pos, len).unwrap(),
+            Self::Cut(n) => (pos as isize + n + len as isize) as usize % len,
+        }
+    }
+}
+
+trait Ops {
+    fn mul_mod(a: Self, b: Self, m: Self) -> Self;
+}
+
+macro_rules! impl_ops {
+    ($type:ty) => {
+        impl Ops for $type {
+            fn mul_mod(mut a: Self, mut b: Self, m: Self) -> Self {
+                let mut res = 0;
+                a %= m;
+
+                while b > 0 {
+                    if b % 2 == 1 {
+                        res = (res + a) % m;
+                    }
+
+                    a = (a * 2) % m;
+                    b /= 2;
+                }
+
+                res % m
+            }
+        }
+    };
+}
+
+impl_ops!(isize);
+impl_ops!(usize);
+
+fn egcd(a: isize, b: isize) -> (isize, isize, isize) {
+    if a == 0 {
+        (b, 0, 1)
+    } else {
+        let (g, x, y) = egcd(b % a, a);
+        (g, y - (b / a) * x, x)
+    }
+}
+
+fn mod_inv(x: usize, n: usize) -> Option<usize> {
+    let (g, x, _) = egcd(x as isize, n as isize);
+    if g == 1 {
+        Some((x % n as isize + n as isize) as usize % n)
+    } else {
+        None
+    }
+}
+
+fn linear_congruence(a: usize, b: usize, m: usize) -> Option<usize> {
+    mod_inv(a, m).map(|i| usize::mul_mod(b, i, m))
 }
 
 #[cfg(test)]
@@ -92,6 +243,6 @@ mod tests {
 
     #[test]
     fn test22() {
-        crate::util::tests::test_full_problem(22, solve, 4284, 0);
+        crate::util::tests::test_full_problem(22, solve, 4284, 96_797_432_275_571);
     }
 }
