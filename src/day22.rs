@@ -42,6 +42,8 @@ fn part2(input: &str) -> usize {
 
     let mut final_shuffle = Vec::with_capacity(6);
 
+    // Basically add n many copies of the shuffle to itself with n
+    // being the largest exponent of two that is smaller than `iters`
     while iters > 0 {
         let mut pow = if iters.is_power_of_two() {
             iters
@@ -72,6 +74,7 @@ fn part2(input: &str) -> usize {
     p2
 }
 
+// Swap & remove elements until the shuffle contains only one element per Step variant
 fn minimize_shuffle(shuffle: &mut Vec<Step>, len: usize) {
     let mut changed = true;
 
@@ -81,6 +84,7 @@ fn minimize_shuffle(shuffle: &mut Vec<Step>, len: usize) {
 
         while i < shuffle.len() - 1 {
             match (shuffle[i], shuffle[i + 1]) {
+                // Simple cases
                 (Step::NewStack, Step::NewStack) => {
                     shuffle.remove(i + 1);
                     shuffle.remove(i);
@@ -97,6 +101,8 @@ fn minimize_shuffle(shuffle: &mut Vec<Step>, len: usize) {
                     shuffle[i] = Step::Increment(usize::mul_mod(a, b, len));
                     changed = true;
                 }
+
+                // Cross cases
                 (Step::Cut(a), Step::Increment(b)) => {
                     shuffle.swap(i, i + 1);
                     shuffle[i + 1] = Step::Cut(isize::mul_mod(a, b as isize, len as isize));
@@ -169,6 +175,7 @@ impl Step {
         }
     }
 
+    // To which position will position `pos` be mapped after one shuffle
     fn predict_next(self, pos: usize, len: usize) -> usize {
         match self {
             Self::NewStack => len - pos - 1,
@@ -177,6 +184,7 @@ impl Step {
         }
     }
 
+    // What position is being mapped to position `pos` after one shuffle
     fn predict_prev(self, pos: usize, len: usize) -> usize {
         match self {
             Self::NewStack => len - pos - 1,
@@ -187,6 +195,7 @@ impl Step {
 }
 
 trait Ops {
+    /// `(a * b) % m` without overflow
     fn mul_mod(a: Self, b: Self, m: Self) -> Self;
 }
 
@@ -215,13 +224,9 @@ macro_rules! impl_ops {
 impl_ops!(isize);
 impl_ops!(usize);
 
-fn egcd(a: isize, b: isize) -> (isize, isize, isize) {
-    if a == 0 {
-        (b, 0, 1)
-    } else {
-        let (g, x, y) = egcd(b % a, a);
-        (g, y - (b / a) * x, x)
-    }
+// Thanks https://www.youtube.com/watch?v=XoTEKjS61kI
+fn linear_congruence(a: usize, b: usize, m: usize) -> Option<usize> {
+    mod_inv(a, m).map(|i| usize::mul_mod(b, i, m))
 }
 
 fn mod_inv(x: usize, n: usize) -> Option<usize> {
@@ -233,8 +238,13 @@ fn mod_inv(x: usize, n: usize) -> Option<usize> {
     }
 }
 
-fn linear_congruence(a: usize, b: usize, m: usize) -> Option<usize> {
-    mod_inv(a, m).map(|i| usize::mul_mod(b, i, m))
+fn egcd(a: isize, b: isize) -> (isize, isize, isize) {
+    if a == 0 {
+        (b, 0, 1)
+    } else {
+        let (g, x, y) = egcd(b % a, a);
+        (g, y - (b / a) * x, x)
+    }
 }
 
 #[cfg(test)]
